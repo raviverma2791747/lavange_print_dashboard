@@ -8,6 +8,8 @@
   import { httpClient } from "../../helper/httpClient";
   import { token_store } from "../../helper/store";
   import { fetchCategory } from "../../helper/endpoints";
+  import { formatDate } from "../../helper/utils";
+  import { DATE_TIME_FORMAT } from "../../helper/constants";
   
     let categories = [];
     let loading = true;
@@ -55,6 +57,7 @@
                   <th scope="col" class="px-6 py-3"> Title </th>
                   <!-- <th scope="col" class="px-6 py-3"> Status </th> -->
                   <th scope="col" class="px-6 py-3"> Action </th>
+                  <th scope="col" class="px-6 py-3"> Modified </th>
                 </tr>
               </thead>
               <tbody>
@@ -77,6 +80,9 @@
                         href={`/category/${category._id}`}
                         class="font-medium text-blue-600 hover:underline">View</a
                       >
+                    </td>
+                    <td class="px-6 py-4">
+                      {formatDate(category.updatedAt, DATE_TIME_FORMAT)}
                     </td>
                   </tr>
                 {/each}

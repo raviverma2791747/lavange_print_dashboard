@@ -28,4 +28,8 @@ export const updateProduct = "/private/product";
 export const getTag = "/private/tag";
 export const updateTag = "/private/tag";
 export const updateAnnouncement = "/private/announcement";
+export const getStats = "/private/stats";
+export const fetchOrder = "/private/order";
+export const getOrder = "/private/order";
+export const updateOrder = "/private/order";
 
