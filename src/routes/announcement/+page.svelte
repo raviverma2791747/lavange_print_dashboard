@@ -6,6 +6,8 @@
   import { httpClient } from "../../helper/httpClient";
   import { token_store } from "../../helper/store";
   import { fetchAnnouncement } from "../../helper/endpoints";
+  import { formatDate } from "../../helper/utils";
+  import { DATE_TIME_FORMAT } from "../../helper/constants";
 
   let annoucements = [];
   let loading = true;
@@ -54,6 +56,7 @@
                 <th scope="col" class="px-6 py-3"> Title </th>
                 <th scope="col" class="px-6 py-3"> Status </th>
                 <th scope="col" class="px-6 py-3"> Action </th>
+                <th scope="col" class="px-6 py-3"> Modified </th>
               </tr>
             </thead>
             <tbody>
@@ -76,6 +79,9 @@
                       href={`/announcement/${annoucement._id}`}
                       class="font-medium text-blue-600 hover:underline">Edit</a
                     >
+                  </td>
+                  <td class="px-6 py-4">
+                    {formatDate(annoucement.updatedAt, DATE_TIME_FORMAT)}
                   </td>
                 </tr>
               {/each}

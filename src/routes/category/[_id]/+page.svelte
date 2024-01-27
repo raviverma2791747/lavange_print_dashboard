@@ -16,7 +16,7 @@
   };
 
   const handleSave = async () => {
-    await httpClient(`${updateCategory}/${category_id}`, {
+    await httpClient(updateCategory, {
       method: "POST",
       token: $token_store,
       payload: category,

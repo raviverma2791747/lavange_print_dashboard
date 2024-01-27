@@ -54,6 +54,7 @@
     if (token) {
       token_store.set(token);
     } else {
+      
     }
   });
 </script>
@@ -61,7 +62,7 @@
 <div class="flex flex-col min-h-screen">
   {#if $page.url.pathname === "/login"}
     <slot />
-  {:else}
+  {:else if $user_info_store}
     <Header {sidebarOpen} {toggleSidebar} />
     <div class="bg-gray-100 flex grow">
       <div

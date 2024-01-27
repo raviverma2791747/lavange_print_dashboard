@@ -19,6 +19,7 @@
     fetchTag,
     fetchCategory,
     fetchCollection,
+    updateImage,
   } from "../../../helper/endpoints";
 
   const product_id = $page.params._id;
@@ -214,7 +215,7 @@
     });
     if (response.status === 200) {
       if (product_id === "create") {
-        goto(`/product/${response.data.product._id}`);
+        goto(`/product/${response.data.product.id}`);
       }
     }
 
