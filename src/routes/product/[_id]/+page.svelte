@@ -21,6 +21,7 @@
     fetchCollection,
     updateImage,
   } from "../../../helper/endpoints";
+  import Editor from "../../../components/Editor.svelte";
 
   const product_id = $page.params._id;
   let loading = true;
@@ -350,12 +351,15 @@
   };
 
   onMount(async () => {
+
     if (product_id !== "create") {
       await initProduct();
       product_ = structuredClone(product);
       previewImages = [...product.assets];
     }
     loading = false;
+
+
   });
 
   $: {
@@ -406,13 +410,14 @@
             class="block mb-2 text-sm font-medium text-gray-900"
             >Description</label
           >
-          <textarea
+          <Editor bind:content={product.description} placeholder="Product Description" />
+          <!-- <textarea
             id="description"
             rows="5"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder="Product Description"
             bind:value={product.description}
-          />
+          /> -->
         </div>
 
         <div class="mb-5">
@@ -421,12 +426,13 @@
             class="block mb-2 text-sm font-medium text-gray-900"
             >Specificationn</label
           >
-          <textarea
+          <Editor bind:content={product.specification} placeholder="Specification" />
+          <!-- <textarea
             rows="5"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder="Specification"
             bind:value={product.specification}
-          />
+          /> -->
         </div>
       </div>
 
@@ -845,3 +851,5 @@
     >
   </Loading>
 </div>
+
+
