@@ -38,8 +38,8 @@
           // Local undo shouldn’t undo changes made by other users
           userOnly: true,
         },
-        placeholder: placeholder,
       },
+      placeholder: placeholder,
     });
 
     quill.clipboard.dangerouslyPasteHTML(content);
