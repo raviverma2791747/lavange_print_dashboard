@@ -22,11 +22,13 @@
     updateImage,
   } from "../../../helper/endpoints";
   import Editor from "../../../components/Editor.svelte";
+  import slug from "slug";
 
   const product_id = $page.params._id;
   let loading = true;
   let product = {
     title: "",
+    slug: "",
     description: "",
     price: 0,
     assets: [],
@@ -280,6 +282,10 @@
     }
   };
 
+  const handleSlug = () => {
+    product.slug = slug(product.title);
+  };
+
   // const handleGenerateVariant = () => {
   //   product.variants = generateVariants(product.variantOptions) ?? [];
   // };
@@ -351,15 +357,12 @@
   };
 
   onMount(async () => {
-
     if (product_id !== "create") {
       await initProduct();
       product_ = structuredClone(product);
       previewImages = [...product.assets];
     }
     loading = false;
-
-
   });
 
   $: {
@@ -405,12 +408,36 @@
           />
         </div>
         <div class="mb-5">
+          <label for="slug" class="block mb-2 text-sm font-medium text-gray-900"
+            >Slug</label
+          >
+          <div class="flex gap-2">
+          <input
+            type="text"
+            id="slug"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            placeholder="Product slug"
+            bind:value={product.slug}
+          />
+
+          <button
+            class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+            on:click={handleSlug}
+          >
+            Generate
+          </button>
+          </div>
+        </div>
+        <div class="mb-5">
           <label
             for="description"
             class="block mb-2 text-sm font-medium text-gray-900"
             >Description</label
           >
-          <Editor bind:content={product.description} placeholder="Product Description" />
+          <Editor
+            bind:content={product.description}
+            placeholder="Product Description"
+          />
           <!-- <textarea
             id="description"
             rows="5"
@@ -426,7 +453,10 @@
             class="block mb-2 text-sm font-medium text-gray-900"
             >Specificationn</label
           >
-          <Editor bind:content={product.specification} placeholder="Specification" />
+          <Editor
+            bind:content={product.specification}
+            placeholder="Specification"
+          />
           <!-- <textarea
             rows="5"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -851,5 +881,3 @@
     >
   </Loading>
 </div>
-
-
