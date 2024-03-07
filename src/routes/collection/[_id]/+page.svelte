@@ -14,6 +14,7 @@
     updateImage,
   } from "../../../helper/endpoints";
   import Editor from "../../../components/Editor.svelte";
+  import slug from "slug";
 
   let loading = true;
   let collection_id;
@@ -91,6 +92,10 @@
     loading = false;
   };
 
+  const handleSlug = () => {
+    collection.slug = slug(collection.name);
+  };
+
   onMount(async () => {
     collection_id = $page.params._id;
 
@@ -165,6 +170,7 @@
           <label class="block mb-2 text-sm font-medium text-gray-900"
             >Slug</label
           >
+          <div class="flex gap-2">
           <input
             type="text"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -172,6 +178,14 @@
             bind:value={collection.slug}
             disabled={!edit}
           />
+
+          <button
+          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+          on:click={handleSlug}
+        >
+          Generate
+        </button>
+          </div>
         </div>
 
         <div class="mb-5">
