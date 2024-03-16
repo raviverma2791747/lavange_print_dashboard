@@ -10,5 +10,20 @@ export function formatCurrency(amount) {
       style: "currency",
       currency: "INR",
     }).format(amount);
-  }
+}
+
+
+export const getVariantSchema = (product, variantSchemaID) => {
+  
+  return product.variantConfigs.find((variantConfig) => {
+    return variantConfig._id === variantSchemaID;
+  });
+}
+
+export const getVariant = (variantConfig, variantID) => {
+
+  return variantConfig.variants.find((variant) => {
+    return variant._id === variantID;
+  });
+}
   

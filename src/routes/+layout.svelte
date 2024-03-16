@@ -10,8 +10,10 @@
   import { httpClient } from "../helper/httpClient";
   import { userInfo } from "../helper/endpoints";
   import { browser } from "$app/environment";
+  import Loading from "../components/Loading.svelte";
 
   let sidebarOpen = true;
+  let initial_load = true;
 
   const toggleSidebar = () => {
     sidebarOpen = !sidebarOpen;
@@ -40,21 +42,28 @@
   user_info_store.subscribe((user) => {
     if (user) {
       if (browser) {
-        goto("/");
+        if ($page.url.pathname === "/login") {
+          goto("/");
+        } else {
+          goto($page.url.pathname);
+        }
       }
-    } else {
+    } else if (!initial_load) {
       if (browser) {
         goto("/login");
       }
     }
+    initial_load = false;
   });
 
-  onMount(async () => {
+  onMount(() => {
     const token = localStorage.getItem("token");
     if (token) {
       token_store.set(token);
     } else {
-      
+      if (browser) {
+        goto("/login");
+      }
     }
   });
 </script>
@@ -62,7 +71,7 @@
 <div class="flex flex-col min-h-screen">
   {#if $page.url.pathname === "/login"}
     <slot />
-  {:else if $user_info_store}
+  {:else if $user_info_store && $token_store}
     <Header {sidebarOpen} {toggleSidebar} />
     <div class="bg-gray-100 flex grow">
       <div
@@ -74,6 +83,8 @@
         <slot />
       </div>
     </div>
+  {:else}
+    <Loading />
   {/if}
 </div>
 

@@ -3,6 +3,8 @@
   import type { MouseEventHandler } from "svelte/elements";
   import MenuIcon from "./svg/MenuIcon.svelte";
   import { token_store, user_info_store } from "../helper/store";
+  import BellIcon from "./svg/BellIcon.svelte";
+  import { socket } from "../socket";
 
   export let sidebarOpen: Boolean;
   export let toggleSidebar: MouseEventHandler<HTMLButtonElement>;
@@ -11,6 +13,12 @@
     token_store.set(null);
     localStorage.removeItem("token");
   };
+
+  const handle = () => {
+    console.log("hello");
+    socket.emit("message", "hello");
+  };
+  
 </script>
 
 <header
@@ -22,6 +30,11 @@
     </button>
     <div class="mr-auto">
       <a href="/">Lavange Print</a>
+    </div>
+    <div>
+      <a  href="/notification">
+        <BellIcon class="w-6 h-6" />
+      </a>
     </div>
     <button>
       {$user_info_store?.firstName ?? ""}

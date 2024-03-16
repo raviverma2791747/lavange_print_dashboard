@@ -4,7 +4,7 @@
   import { v4 as uuidv4 } from "uuid";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import Loading from "../../components/Loading.svelte";
+  import Loading from "../../components/Spinner.svelte";
   import DataTable from "../../components/DataTable/DataTable.svelte";
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
