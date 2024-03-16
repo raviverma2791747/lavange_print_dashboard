@@ -1,7 +1,7 @@
 <script>
   //@ts-nocheck
   import { onMount } from "svelte";
-  import Loading from "../../components/Loading.svelte";
+  import Loading from "../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
   import DataTable from "../../components/DataTable/DataTable.svelte";
   import { format } from "date-fns";
@@ -80,6 +80,8 @@
           ]}
           rows={orders.map((order) => {
             return { ...order, id: order._id };
+          }).sort((a, b) => {
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
           })}
           on:click:row={handleRowClick}
         >

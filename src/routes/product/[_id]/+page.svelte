@@ -3,7 +3,7 @@
   import { page } from "$app/stores";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { onMount } from "svelte";
-  import Loading from "../../../components/Loading.svelte";
+  import Loading from "../../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
   import { v4 as uuidv4 } from "uuid";
   import AddIcon from "../../../components/svg/AddIcon.svelte";

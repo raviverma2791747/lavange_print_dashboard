@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { PUBLIC_API_URI } from "$env/static/public";
   import { onMount } from "svelte";
-  import Loading from "../../components/Loading.svelte";
+  import Loading from "../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
   import AddIcon from "../../components/svg/AddIcon.svelte";
   import DataTable from "../../components/DataTable/DataTable.svelte";

@@ -4,7 +4,7 @@
   import { v4 as uuidv4 } from "uuid";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import Loading from "../../../components/Loading.svelte";
+  import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { getUser, updateUser } from "../../../helper/endpoints";
   import { token_store } from "../../../helper/store";

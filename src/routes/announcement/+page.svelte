@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import Loading from "../../components/Loading.svelte";
+  import Loading from "../../components/Spinner.svelte";
   import { httpClient } from "../../helper/httpClient";
   import { token_store } from "../../helper/store";
   import { fetchAnnouncement } from "../../helper/endpoints";

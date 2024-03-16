@@ -1,3 +1,4 @@
+//@ts-nocheck
 export const fetchUser = "/private/user";
 export const fetchProduct = "/private/product";
 export const fetchCategory = "/private/category";
@@ -32,4 +33,5 @@ export const getStats = "/private/stats";
 export const fetchOrder = "/private/order";
 export const getOrder = "/private/order";
 export const updateOrder = "/private/order";
-
+export const updateOrderStatus = "/private/order/status";
+export const updateOrderShipping = "/private/order/shipping";

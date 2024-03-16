@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import Loading from "../../../components/Loading.svelte";
+  import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
   import { getCategory, updateCategory } from "../../../helper/endpoints";
