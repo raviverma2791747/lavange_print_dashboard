@@ -1,11 +1,13 @@
 <script>
   //@ts-nocheck
   import { createEventDispatcher, onMount } from "svelte";
+  import EditVariantImage from "./EditVariantImage.svelte";
   const dispatch = createEventDispatcher();
 
   export let variantSchema = [];
   export let variants = [];
   export let disabled = false;
+  let active_variant_index = -1;
 
   const uniqueName = (variant) => {
     const names = Object.keys(variant.attributes);
@@ -37,6 +39,7 @@
     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
       <tr>
         <th scope="col" class="px-6 py-3"> Variant </th>
+        <th scope="col" class="px-6 py-3"> Compare at Price </th>
         <th scope="col" class="px-6 py-3"> Price </th>
         <th scope="col" class="px-6 py-3"> SKU </th>
         <th scope="col" class="px-6 py-3"> Quantity </th>
@@ -44,20 +47,45 @@
       </tr>
     </thead>
     <tbody>
-      {#each variants as variant}
+      {#each variants as variant, index}
         <tr class="bg-white border-b">
           <th
             scope="row"
             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
           >
-          {uniqueName(variant)}
+            <div>{uniqueName(variant)}</div>
+
+            <button
+              {disabled}
+              on:click={() => {
+                active_variant_index = index;
+              }}
+              class="border px-2 py-1 rounded-lg h-24 w-24">Edit Images <br/>
+              {variant.assets.length}
+              </button
+            >
           </th>
           <td class="px-6 py-4">
             <input
-              disabled={disabled}
+              {disabled}
+              bind:value={variant.compareAtPrice}
+              on:blur={(e) => {
+                dispatch("compareAtPrice", {
+                  variant,
+                  compareAtPrice: e.target.value,
+                });
+              }}
+              type="number"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="Compare At Price"
+            />
+          </td>
+          <td class="px-6 py-4">
+            <input
+              {disabled}
               bind:value={variant.price}
-              on:blur={(e)=>{
-                dispatch('price',{ variant, price: e.target.value })
+              on:blur={(e) => {
+                dispatch("price", { variant, price: e.target.value });
               }}
               type="number"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -66,10 +94,10 @@
           </td>
           <td class="px-6 py-4">
             <input
-              disabled={disabled}
+              {disabled}
               bind:value={variant.sku}
-              on:input={(e)=>{
-                dispatch('sku',{ variant })
+              on:input={(e) => {
+                dispatch("sku", { variant });
               }}
               type="text"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -78,10 +106,10 @@
           </td>
           <td class="px-6 py-4">
             <input
-              disabled={disabled}
+              {disabled}
               bind:value={variant.sku}
-              on:input={(e)=>{
-                dispatch('sku',{ variant })
+              on:input={(e) => {
+                dispatch("sku", { variant });
               }}
               type="number"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
@@ -94,3 +122,7 @@
     </tbody>
   </table>
 </div>
+
+{#if active_variant_index !== -1}
+  <EditVariantImage bind:variants bind:active_variant_index variantSchema={variantSchema}  />
+{/if}
