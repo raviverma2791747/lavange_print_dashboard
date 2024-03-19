@@ -1,16 +1,8 @@
 <script>
   //@ts-nocheck
   import { onMount } from "svelte";
-  import Quill from "quill";
   //   import '../../node_modules/quill/dist/quill.core.css';
   import "../../node_modules/quill/dist/quill.snow.css";
-  import Toolbar from "quill/modules/toolbar";
-  import Snow from "quill/themes/snow";
-
-  import Bold from "quill/formats/bold";
-  import Italic from "quill/formats/italic";
-  import Header from "quill/formats/header";
-
   // Quill.register({
   //   // "modules/toolbar": Toolbar,
   //  "themes/snow": Snow,
@@ -24,6 +16,7 @@
   export let placeholder = "Start typing here...";
 
   onMount(async () => {
+    const { default: Quill } = await import("quill");
     var quill = new Quill(editor, {
       theme: "snow",
       modules: {

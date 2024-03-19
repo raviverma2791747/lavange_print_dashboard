@@ -171,20 +171,20 @@
             >Slug</label
           >
           <div class="flex gap-2">
-          <input
-            type="text"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Slug"
-            bind:value={collection.slug}
-            disabled={!edit}
-          />
+            <input
+              type="text"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="Slug"
+              bind:value={collection.slug}
+              disabled={!edit}
+            />
 
-          <button
-          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-          on:click={handleSlug}
-        >
-          Generate
-        </button>
+            <button
+              class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+              on:click={handleSlug}
+            >
+              Generate
+            </button>
           </div>
         </div>
 
@@ -192,7 +192,10 @@
           <label class="block mb-2 text-sm font-medium text-gray-900"
             >Description</label
           >
-          <Editor bind:content={collection.description} placeholder="Description" />
+          <Editor
+            bind:content={collection.description}
+            placeholder="Description"
+          />
           <!-- <textarea
             id="description"
             rows="5"

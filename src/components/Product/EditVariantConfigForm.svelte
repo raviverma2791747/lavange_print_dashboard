@@ -5,6 +5,7 @@
     import EditVariantConfigSchemaOptionForm from "./EditVariantConfigSchemaOptionForm.svelte";
     import VariantTable from "./VariantTable.svelte";
     import { createEventDispatcher } from "svelte";
+  import EditVariantImage from "./EditVariantImage.svelte";
     const dispatch = createEventDispatcher();
   
     let create = false;
@@ -38,6 +39,7 @@
         let variant = {
           sku,
           attributes,
+          compareAtPrice: 0,
           price: 0, // Set the default price for the variant
           inventoryQuantity: 0, // Set the default inventory quantity for the variant
           assets: [],
@@ -213,6 +215,7 @@
         <VariantTable
           variantSchema={variantConfigClone.variantSchema}
           bind:variants={variantConfigClone.variants}
+
         />
       </div>
     {/if}

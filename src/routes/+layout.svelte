@@ -28,6 +28,9 @@
       user_info_store.set(response.data.user);
     } else {
       token_store.set(null);
+      if (browser) {
+        goto("/login");
+      }
     }
   };
 
@@ -48,7 +51,7 @@
           goto($page.url.pathname);
         }
       }
-    } else if (!initial_load) {
+    } else if (!initial_load   ) {
       if (browser) {
         goto("/login");
       }

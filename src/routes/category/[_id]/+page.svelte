@@ -6,6 +6,7 @@
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
   import { getCategory, updateCategory } from "../../../helper/endpoints";
+  import slug from "slug";
 
   let loading = true;
   let category_id;
@@ -32,6 +33,10 @@
       category = response.data.category;
     }
     loading = false;
+  };
+
+  const handleSlug = () => {
+    category.slug = slug(category.name);
   };
 
   onMount(async () => {
@@ -69,6 +74,22 @@
       {#if loading === true}
         <Loading />
       {:else if loading === false}
+        <div class="mb-4">
+          <label
+            for="status"
+            class="block mb-2 text-sm font-medium text-gray-900"
+          >
+            Status
+          </label>
+          <select
+            bind:value={category.status}
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+          >
+            <option value="draft">Draft</option>
+            <option value="active">Active</option>
+            <option value="archive">Archive</option>
+          </select>
+        </div>
         <div class="mb-5">
           <label
             for="title"
@@ -82,6 +103,37 @@
             disabled={!edit}
           />
         </div>
+
+        <div class="mb-2">
+          <label class="block mb-2 text-sm font-medium text-gray-900"
+            >Slug</label
+          >
+          <div class="flex gap-2">
+            <input
+              type="text"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="Slug"
+              bind:value={category.slug}
+              disabled={!edit}
+            />
+
+            <button
+              class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+              on:click={handleSlug}
+            >
+              Generate
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+          on:click={() => {
+            edit = true;
+          }}
+        >
+          Edit
+        </button>
       {/if}
     </div>
   </div>

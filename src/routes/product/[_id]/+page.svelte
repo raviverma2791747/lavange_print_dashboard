@@ -23,6 +23,7 @@
   } from "../../../helper/endpoints";
   import Editor from "../../../components/Editor.svelte";
   import slug from "slug";
+  import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
 
   const product_id = $page.params._id;
   let loading = true;
@@ -31,6 +32,7 @@
     slug: "",
     description: "",
     price: 0,
+    compareAtPrice: 0,
     assets: [],
     trackQuantity: false,
     inventoryQuantity: 0,
@@ -157,6 +159,7 @@
       let variant = {
         sku,
         attributes,
+        compareAtPrice: 0,
         price: 0, // Set the default price for the variant
         inventoryQuantity: 0, // Set the default inventory quantity for the variant
       };
@@ -196,6 +199,7 @@
     return {
       sku: "",
       attributes: {},
+      compareAtPrice: 0,
       price: 0,
       inventoryQuantity: 0,
     };
@@ -300,6 +304,14 @@
     } else {
       tags = [];
     }
+  };
+
+  const removeImage = async (id) => {
+    product.assets =product.assets.filter((asset) => asset.id !== id);
+
+    previewImages = previewImages.filter((previewImage) => {
+      return previewImage.id !== id;
+    });
   };
 
   const searchCollection = async (search) => {
@@ -511,6 +523,17 @@
                     <Loading />
                   </div>
                 </div>
+              {:else}
+              <div class="absolute top-0 z-20 right-0 m-2">
+                <button
+                  class="text-red-500"
+                  on:click={() => {
+                    removeImage(previewImage.id);
+                  }}
+                >
+                  <DeleteIcon />
+                </button>
+              </div>
               {/if}
             </div>
           {/each}
@@ -654,6 +677,21 @@
         class="col-span-2 block shadow p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
       >
         <h3 class="text-normal font-semibold mb-5">Pricing</h3>
+
+        <div class="mb-5">
+          <label
+            for="price"
+            class="block mb-2 text-sm font-medium text-gray-900">Compare at Price</label
+          >
+          <input
+            type="number"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+            placeholder="0.00"
+            min="0"
+            step=".01"
+            bind:value={product.compareAtPrice}
+          />
+        </div>
 
         <div class="mb-5">
           <label
