@@ -19,13 +19,14 @@
     fetchTag,
     fetchCategory,
     fetchCollection,
-    updateImage,
   } from "../../../helper/endpoints";
   import Editor from "../../../components/Editor.svelte";
   import slug from "slug";
   import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
+  import ImageUpload from "../../../components/ImageUpload.svelte";
+  import ImageView from "../../../components/ImageView.svelte";
 
-  const product_id = $page.params._id;
+  let edit = true;
   let loading = true;
   let product = {
     title: "",
@@ -52,82 +53,12 @@
     category: "",
   };
   let product_ = product;
-  let imageInput;
-  let previewImages = [];
   let search_tag = "";
   let search_collection = "";
   let search_category = "";
   let tags = [];
   let collections = [];
   let categories = [];
-
-  const imageUpload = async () => {
-    const file = imageInput.files[0];
-
-    if (file) {
-      // const reader = new FileReader();
-      // reader.addEventListener("load", function () {
-      //   previewImages = [
-      //     ...previewImages,
-      //     {
-      //       uploading: false,
-      //       id: reader.result,
-      //       url: reader.result,
-      //     },
-      //   ];
-      // });
-
-      let id = uuidv4();
-
-      previewImages = [
-        ...previewImages,
-        {
-          uploading: true,
-          id: id,
-          url: "",
-        },
-      ];
-
-      // reader.readAsDataURL(file);
-
-      let formData = new FormData();
-      formData.append("img", file);
-
-      const response = await httpClient(updateImage, {
-        method: "POST",
-        token: $token_store,
-        formData: formData,
-      });
-
-      if (response.status === 200) {
-        product.assets = [
-          ...product.assets,
-          {
-            id: response.data.img.id,
-            url: response.data.img.url,
-          },
-        ];
-
-        const previewImageIndex = previewImages.findIndex(
-          (previewImage_) => previewImage_.id === id
-        );
-
-        if (previewImageIndex !== -1) {
-          previewImages = [
-            ...previewImages.slice(0, previewImageIndex), // Copy elements before the target
-            {
-              ...previewImages[previewImageIndex], // Copy the target object with updates
-              id: response.data.img.id,
-              url: response.data.img.url,
-              uploading: false,
-            },
-            ...previewImages.slice(previewImageIndex + 1), // Copy elements after the target
-          ];
-        }
-      } else {
-      }
-    }
-  };
 
   const generateVariants = (variantOptions) => {
     if (variantOptions.length === 0) {
@@ -157,6 +88,7 @@
 
       //let old_variant = product_.variants.find(())
       let variant = {
+        assets: [],
         sku,
         attributes,
         compareAtPrice: 0,
@@ -202,6 +134,7 @@
       compareAtPrice: 0,
       price: 0,
       inventoryQuantity: 0,
+      assets: [],
     };
   };
 
@@ -221,9 +154,9 @@
       payload: product,
     });
     if (response.status === 200) {
-      if (product_id === "create") {
-        goto(`/product/${response.data.product.id}`);
-      }
+      goto(`/product/${response.data.product.id}`, {
+        replaceState: true,
+      });
     }
 
     loading = false;
@@ -306,14 +239,6 @@
     }
   };
 
-  const removeImage = async (id) => {
-    product.assets =product.assets.filter((asset) => asset.id !== id);
-
-    previewImages = previewImages.filter((previewImage) => {
-      return previewImage.id !== id;
-    });
-  };
-
   const searchCollection = async (search) => {
     const response = await httpClient(fetchCollection, {
       params: { search },
@@ -338,6 +263,12 @@
     }
   };
 
+  const handleRemoveImage = (e) => {
+    product.assets = product.assets.filter((asset) => {
+      return asset !== e.detail.id;
+    });
+  };
+
   // const createvariantConfigs = () => {
   //   return {
   //     status: "draft",
@@ -357,25 +288,17 @@
     ];
   };
 
-  const initProduct = async () => {
+  const initProduct = async (id) => {
     loading = true;
-    const response = await httpClient(`${getProduct}/${product_id}`, {
+    const response = await httpClient(`${getProduct}/${id}`, {
       token: $token_store,
     });
     if (response.status === 200) {
       product = response.data.product;
+      product_ = structuredClone(product);
     }
     loading = false;
   };
-
-  onMount(async () => {
-    if (product_id !== "create") {
-      await initProduct();
-      product_ = structuredClone(product);
-      previewImages = [...product.assets];
-    }
-    loading = false;
-  });
 
   $: {
     searchTag(search_tag);
@@ -389,11 +312,13 @@
     searchCategory(search_category);
   }
 
-  // $: {
-  //   if (product_id === "create") {
-  //     product.variants = generateVariants(product.variantOptions) ?? [];
-  //   }
-  // }
+  $: {
+    if ($page.params._id !== "create") {
+      initProduct($page.params._id);
+    } else {
+      loading = false;
+    }
+  }
 </script>
 
 <div class="py-4 px-8 max-w-7xl mx-auto">
@@ -424,20 +349,20 @@
             >Slug</label
           >
           <div class="flex gap-2">
-          <input
-            type="text"
-            id="slug"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Product slug"
-            bind:value={product.slug}
-          />
+            <input
+              type="text"
+              id="slug"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder="Product slug"
+              bind:value={product.slug}
+            />
 
-          <button
-            class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-            on:click={handleSlug}
-          >
-            Generate
-          </button>
+            <button
+              class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+              on:click={handleSlug}
+            >
+              Generate
+            </button>
           </div>
         </div>
         <div class="mb-5">
@@ -506,56 +431,20 @@
       >
         <h3 class="text-normal font-semibold mb-2">Media</h3>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {#each previewImages as previewImage}
-            <div
-              class="object-cover border border-gray-200 rounded-lg relative"
-            >
-              <img
-                class="h-auto max-w-full"
-                src={previewImage.url}
-                alt={previewImage.id}
-              />
-              {#if previewImage.uploading}
-                <div
-                  class="opacity-30 bg-gray-900 absolute w-full h-full bg-red top-0 left-0 flex justify-center items-center"
-                >
-                  <div>
-                    <Loading />
-                  </div>
-                </div>
-              {:else}
-              <div class="absolute top-0 z-20 right-0 m-2">
-                <button
-                  class="text-red-500"
-                  on:click={() => {
-                    removeImage(previewImage.id);
-                  }}
-                >
-                  <DeleteIcon />
-                </button>
-              </div>
-              {/if}
-            </div>
+          {#each product.assets as asset}
+            <ImageView
+              disabled={!edit}
+              id={asset}
+              on:delete={handleRemoveImage}
+            />
           {/each}
-          <div
-            class="border border-dashed border-gray-200 rounded-lg h-48 w-48 flex justify-center items-center"
-          >
-            <div class="text-center">
-              <label
-                class="bg-purple-100 py-2 px-4 rounded-lg block text-sm text-purple-500 hover:bg-purple-300 cursor-pointer"
-              >
-                <input
-                  type="file"
-                  hidden
-                  on:change={imageUpload}
-                  bind:this={imageInput}
-                />
-                Add
-              </label>
 
-              <div class="text-sm text-gray-400">Images and Videos</div>
-            </div>
-          </div>
+          <ImageUpload
+            disabled={!edit}
+            on:success={(e) => {
+              product.assets = [...product.assets, e.detail._id];
+            }}
+          />
         </div>
       </div>
 
@@ -681,7 +570,8 @@
         <div class="mb-5">
           <label
             for="price"
-            class="block mb-2 text-sm font-medium text-gray-900">Compare at Price</label
+            class="block mb-2 text-sm font-medium text-gray-900"
+            >Compare at Price</label
           >
           <input
             type="number"

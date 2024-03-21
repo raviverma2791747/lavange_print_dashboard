@@ -42,6 +42,7 @@
 
       //let old_variant = product_.variants.find(())
       let variant = {
+        assets: [],
         sku,
         attributes,
         price: 0, // Set the default price for the variant

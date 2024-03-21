@@ -12,6 +12,7 @@
   // });
 
   let editor;
+  let disabled = false;
   export let content = "";
   export let placeholder = "Start typing here...";
 
