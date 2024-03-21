@@ -30,6 +30,8 @@
 
     return uname;
   };
+
+  console.log(variants);
 </script>
 
 <div class="relative overflow-x-auto">

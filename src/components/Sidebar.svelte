@@ -128,13 +128,21 @@
         >
       </li>
       <li
-      class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-    >
-      <a class="flex justify-star items-center gap-2" href="/role">
-        <SellIcon class="text-gray-500 w-6 h-6" />
-        <span class:hidden={!sidebarOpen}>Roles</span></a
+        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
       >
-    </li>
+        <a class="flex justify-star items-center gap-2" href="/role">
+          <SellIcon class="text-gray-500 w-6 h-6" />
+          <span class:hidden={!sidebarOpen}>Roles</span></a
+        >
+      </li>
+      <li
+        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
+      >
+        <a class="flex justify-star items-center gap-2" href="/image">
+          <SellIcon class="text-gray-500 w-6 h-6" />
+          <span class:hidden={!sidebarOpen}>Image</span></a
+        >
+      </li>
     </ul>
   </nav>
 </div>
