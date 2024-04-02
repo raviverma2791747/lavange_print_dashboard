@@ -39,3 +39,6 @@ export const getOrder = "/private/order";
 export const updateOrder = "/private/order";
 export const updateOrderStatus = "/private/order/status";
 export const updateOrderShipping = "/private/order/shipping";
+export const fetchCoupon = "/private/coupon";
+export const getCoupon = "/private/coupon";
+export const updateCoupon = "/private/coupon";

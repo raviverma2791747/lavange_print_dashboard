@@ -143,6 +143,14 @@
           <span class:hidden={!sidebarOpen}>Image</span></a
         >
       </li>
+      <li
+      class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
+    >
+      <a class="flex justify-star items-center gap-2" href="/coupon">
+        <SellIcon class="text-gray-500 w-6 h-6" />
+        <span class:hidden={!sidebarOpen}>Coupon</span></a
+      >
+    </li>
     </ul>
   </nav>
 </div>
