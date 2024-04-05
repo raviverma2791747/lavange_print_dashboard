@@ -35,8 +35,8 @@
     });
 
     if (response.status === 200) {
-      goto(`/announcement/${response.data.announcement.id}`,{
-        replaceState: true
+      goto(`/announcement/${response.data.announcement.id}`, {
+        replaceState: true,
       });
       edit = false;
     }
@@ -129,9 +129,16 @@
       </div>
 
       {#if announcement.asset}
-        <ImageView disabled={!edit}  id={announcement.asset} on:delete={handleRemoveImage} />
+        <ImageView
+          disabled={!edit}
+          id={announcement.asset}
+          on:delete={handleRemoveImage}
+        />
       {:else}
-        <ImageUpload disabled={!edit}  on:success={(e) => (announcement.asset = e.detail._id)} />
+        <ImageUpload
+          disabled={!edit}
+          on:success={(e) => (announcement.asset = e.detail._id)}
+        />
       {/if}
     {/if}
   </div>

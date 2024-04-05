@@ -7,6 +7,8 @@
   import { token_store } from "../../../helper/store";
   import { getCategory, updateCategory } from "../../../helper/endpoints";
   import slug from "slug";
+  import ImageView from "../../../components/ImageView.svelte";
+  import ImageUpload from "../../../components/ImageUpload.svelte";
 
   let loading = true;
   let category_id;
@@ -37,6 +39,10 @@
 
   const handleSlug = () => {
     category.slug = slug(category.name);
+  };
+
+  const handleRemoveImage = async () => {
+    category.asset = null;
   };
 
   onMount(async () => {
@@ -124,6 +130,23 @@
               Generate
             </button>
           </div>
+        </div>
+
+        <div class="mb-2">
+          {#if category.asset}
+            <div class="w-48 border">
+              <ImageView
+                disabled={!edit}
+                id={category.asset}
+                on:delete={handleRemoveImage}
+              />
+            </div>
+          {:else}
+            <ImageUpload
+              disabled={!edit}
+              on:success={(e) => (category.asset = e.detail._id)}
+            />
+          {/if}
         </div>
 
         <button

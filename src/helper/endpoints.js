@@ -42,3 +42,5 @@ export const updateOrderShipping = "/private/order/shipping";
 export const fetchCoupon = "/private/coupon";
 export const getCoupon = "/private/coupon";
 export const updateCoupon = "/private/coupon";
+export const getPolicy = "/private/config/policy";
+export const updatePolicy = "/private/config/policy";

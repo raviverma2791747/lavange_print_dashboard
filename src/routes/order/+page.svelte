@@ -61,6 +61,10 @@
               display: (user) => user.username,
             },
             {
+              key:"status",
+              value: "Status"
+            },
+            {
               key: "items",
               value: "total",
               display: (items) =>

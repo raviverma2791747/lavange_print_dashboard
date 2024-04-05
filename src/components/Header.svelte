@@ -18,11 +18,13 @@
     console.log("hello");
     socket.emit("message", "hello");
   };
+
+  
   
 </script>
 
 <header
-  class="bg-white w-full border-b border-gray-200 sticky top-0 z-20 shadow"
+  class="bg-white w-full border-b border-gray-200 sticky top-0 z-20 shadow h-16"
 >
   <nav class="flex items-center w-full mx-auto p-4 gap-2">
     <button id="menu-button" on:click={toggleSidebar}>
