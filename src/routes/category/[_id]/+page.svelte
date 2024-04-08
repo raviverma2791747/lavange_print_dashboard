@@ -5,17 +5,28 @@
   import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
-  import { getCategory, updateCategory } from "../../../helper/endpoints";
+  import {
+    fetchFacet,
+    getCategory,
+    updateCategory,
+  } from "../../../helper/endpoints";
   import slug from "slug";
   import ImageView from "../../../components/ImageView.svelte";
   import ImageUpload from "../../../components/ImageUpload.svelte";
+  import Autocomplete from "../../../components/Autocomplete.svelte";
+  import FacetPill from "../../../components/Category/FacetPill.svelte";
+  import { facet_cache } from "../../../helper/cache_store";
+  import throttle from "lodash/throttle";
 
   let loading = true;
   let category_id;
   let edit = false;
+  let facet_input;
+  let suggested_facets = [];
 
   let category = {
     name: "",
+    facets: [],
   };
 
   const handleSave = async () => {
@@ -44,6 +55,49 @@
   const handleRemoveImage = async () => {
     category.asset = null;
   };
+
+  const fetchFacets = async (search) => {
+    if (search) {
+      const response = await httpClient(fetchFacet, {
+        params: { search },
+        token: $token_store,
+      });
+
+      if (response.status === 200) {
+        suggested_facets = response.data.facets ?? [];
+      } else {
+        suggested_facets = [];
+      }
+
+      suggested_facets.forEach((facet) => {
+        if (!$facet_cache.has(facet._id)) {
+          $facet_cache.set(facet._id, facet);
+        }
+      });
+    }
+  };
+
+  const handleAddFacet = async (id) => {
+    if (category.facets.includes(id)) {
+      facet_input = "";
+      return;
+    }
+    category.facets = [...category.facets, id];
+    facet_input = "";
+  };
+
+  const handleRemoveFacet = async (id) => {
+    category.facets = category.facets.filter((facet) => facet !== id);
+  };
+
+  const throttledFetchFacets = throttle(fetchFacets, 1000, {
+    leading: true,
+    trailing: true,
+  });
+
+  $: {
+    throttledFetchFacets(facet_input);
+  }
 
   onMount(async () => {
     category_id = $page.params._id;
@@ -129,6 +183,45 @@
             >
               Generate
             </button>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label
+            for="facets"
+            class="block mb-2 text-sm font-medium text-gray-900">Facets</label
+          >
+
+          <div class="border rounded-lg p-2 flex gap-4 flex-wrap items-center">
+            {#each category.facets as facet}
+              <FacetPill
+                id={facet}
+                {edit}
+                on:remove={() => handleRemoveFacet(facet)}
+              />
+            {/each}
+
+            <div class="grow">
+              <Autocomplete
+                placeholder="Search Facet"
+                bind:search={facet_input}
+                items={suggested_facets}
+                on:selected={(e) => {
+                  handleAddFacet(e.detail.item._id);
+                }}
+              >
+                <svelte:fragment slot="item" let:item
+                  >{item.name}</svelte:fragment
+                >
+              </Autocomplete>
+            </div>
+            <!-- <input
+              class="outline-none"
+              type="text"
+              bind:value={user_input}
+              on:keydown={(e) => handleAddUser(e)}
+              placeholder="Enter username"
+            /> -->
           </div>
         </div>
 
