@@ -7,7 +7,7 @@
   import * as Card from "$lib/components/ui/card";
   import Spinner from "../../../components/Spinner.svelte";
   import Label from "$lib/components/ui/label/label.svelte";
-  import Input from "$lib/components/ui/Input/Input.svelte";
+  import Input from "$lib/components/ui/input/input.svelte";
   import * as Select from "$lib/components/ui/select";
   import { getByValue, toastMessage } from "../../../helper/utils";
   import { USER_STATUS } from "../../../helper/constants";
