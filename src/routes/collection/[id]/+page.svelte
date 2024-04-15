@@ -11,12 +11,12 @@
   import ImageUpload from "../../../components/ImageUpload.svelte";
   import ImageView from "../../../components/ImageView.svelte";
   import * as Card from "$lib/components/ui/card";
-  import Label from "$lib/components/ui/Label/Label.svelte";
   import * as Select from "$lib/components/ui/select";
   import { getByValue, toastMessage } from "../../../helper/utils";
   import { STATUS } from "../../../helper/constants";
   import Input from "$lib/components/ui/input/input.svelte";
   import Button from "$lib/components/ui/button/button.svelte";
+  import Label from "$lib/components/ui/label/label.svelte";
 
   let loading = true;
   let edit = false;
