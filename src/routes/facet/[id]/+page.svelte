@@ -6,7 +6,7 @@
   import { getFacet, updateFacet } from "../../../helper/endpoints";
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
-  import Button from "$lib/components/ui/Button/Button.svelte";
+  import Button from "$lib/components/ui/button/Button.svelte";
   import * as Card from "$lib/components/ui/card";
   import Input from "$lib/components/ui/input/input.svelte";
   import * as Select from "$lib/components/ui/select";
