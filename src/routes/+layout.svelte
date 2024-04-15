@@ -11,6 +11,8 @@
   import { userInfo } from "../helper/endpoints";
   import { browser } from "$app/environment";
   import Loading from "../components/Loading.svelte";
+  import { ModeWatcher } from "mode-watcher";
+  import { Toaster } from "$lib/components/ui/sonner";
 
   let sidebarOpen = true;
   let initial_load = true;
@@ -51,7 +53,7 @@
           goto($page.url.pathname);
         }
       }
-    } else if (!initial_load   ) {
+    } else if (!initial_load) {
       if (browser) {
         goto("/login");
       }
@@ -71,18 +73,19 @@
   });
 </script>
 
+<ModeWatcher />
 <div class="flex flex-col min-h-screen">
   {#if $page.url.pathname === "/login"}
     <slot />
   {:else if $user_info_store && $token_store}
-    <Header {sidebarOpen} {toggleSidebar} />
-    <div class="bg-gray-100 flex grow">
+    <Header />
+    <div class="flex grow">
       <div
-        class="sidebar-h bg-white border-r border-gray-200 sticky left-0 shadow"
+        class="h-[calc(100vh-64px)] top-[64px] border-r sticky left-0 hidden lg:block"
       >
-        <Sidebar {sidebarOpen} />
+        <Sidebar />
       </div>
-      <div class=" grow transition-all duration-200 ease-in-out">
+      <div class="grow">
         <slot />
       </div>
     </div>
@@ -90,10 +93,4 @@
     <Loading />
   {/if}
 </div>
-
-<style>
-  .sidebar-h {
-    top: 57px;
-    height: calc(100vh - 57px);
-  }
-</style>
+<Toaster expand={true} richColors />

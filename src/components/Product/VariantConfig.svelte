@@ -3,6 +3,11 @@
   import VariantSchemaOption from "./VariantSchemaOption.svelte";
   import VariantTable from "./VariantTable.svelte";
   import { createEventDispatcher } from "svelte";
+  import * as Select from "$lib/components/ui/select";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { STATUS } from "../../helper/constants";
+  import { getByValue } from "../../helper/utils";
   const dispatch = createEventDispatcher();
 
   export let variantConfig;
@@ -12,23 +17,31 @@
   const handleEdit = () => {
     dispatch("edit", { index });
   };
-
 </script>
 
-<div class="border border-gray-200 rounded-lg p-4">
+<div class="border rounded-lg p-4">
   <div class="mb-4">
-    <label for="status" class="block mb-2 text-sm font-medium text-gray-900">
-      Status
-    </label>
-    <select
+    <Label for="status">Status</Label>
+
+    <Select.Root
       disabled={true}
-      value={variantConfig.status}
-      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+      selected={{
+        value: variantConfig.status,
+        label: getByValue(STATUS, variantConfig.status),
+      }}
+      onSelectedChange={(v) => {
+        v && (variantConfig.status = v.value);
+      }}
     >
-      <option value="draft">Draft</option>
-      <option value="active">Active</option>
-      <option value="archive">Archive</option>
-    </select>
+      <Select.Trigger>
+        <Select.Value class="capitalize" placeholder="Status" />
+      </Select.Trigger>
+      <Select.Content>
+        {#each Object.entries(STATUS) as [key, value]}
+          <Select.Item {value} label={key} />
+        {/each}
+      </Select.Content>
+    </Select.Root>
   </div>
 
   <div class="mb-4 flex flex-col gap-4 divide-y">
@@ -51,16 +64,9 @@
         disabled={true}
       />
     </div>
-    
   {/if}
 
   <div class="flex gap-2">
-    <button
-      class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-      on:click={handleEdit}
-      disabled={disabled}
-      >
-      Edit
-    </button>
+    <Button on:click={handleEdit} {disabled}>Edit</Button>
   </div>
 </div>

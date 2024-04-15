@@ -6,6 +6,7 @@
   import Loading from "../../../components/Spinner.svelte";
   import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
   import ImageView from "../../../components/ImageView.svelte";
+  import * as Card from "$lib/components/ui/card";
 
   let loading = true;
   let images = [];
@@ -49,19 +50,22 @@
             Add Product</button
           > -->
   </div>
-  <div
-    class="block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-  >
-    {#if loading}
-      <Loading />
-    {:else if images.length === 0}
-      <p>No images found</p>
-    {:else}
-      <div class="grid grid-cols-4 gap-4">
-        {#each images as image}
-          <ImageView id={image._id} on:delete={() => removeImage(image._id)} />
-        {/each}
-      </div>
-    {/if}
-  </div>
+  <Card.Root>
+    <Card.Content class="p-4">
+      <Loading {loading}>
+        {#if images.length === 0}
+          <p>No images found</p>
+        {:else}
+          <div class="grid grid-cols-4 gap-4">
+            {#each images as image}
+              <ImageView
+                id={image._id}
+                on:delete={() => removeImage(image._id)}
+              />
+            {/each}
+          </div>
+        {/if}
+      </Loading>
+    </Card.Content>
+  </Card.Root>
 </div>

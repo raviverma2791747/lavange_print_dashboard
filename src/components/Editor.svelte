@@ -15,10 +15,11 @@
   let disabled = false;
   export let content = "";
   export let placeholder = "Start typing here...";
+  var quill;
 
   onMount(async () => {
     const { default: Quill } = await import("quill");
-    var quill = new Quill(editor, {
+    quill = new Quill(editor, {
       theme: "snow",
       modules: {
         // cursors: true,
@@ -36,12 +37,21 @@
       placeholder: placeholder,
     });
 
+    quill.enable(!disabled);
+
     quill.clipboard.dangerouslyPasteHTML(content);
 
     quill.on("text-change", (delta, oldDelta, source) => {
       content = quill.root.innerHTML;
     });
   });
+
+  $ : {
+    console.log(disabled)
+    quill?.enable(!disabled);
+  }
+
+
 </script>
 
 <div bind:this={editor}></div>

@@ -7,6 +7,11 @@
   import { httpClient } from "../../helper/httpClient";
   import { token_store } from "../../helper/store";
   import { fetchCollection } from "../../helper/endpoints";
+  import * as Card from "$lib/components/ui/card";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import DataTable from "../../components/DataTable.svelte";
+  import { formatDate, getByValue } from "../../helper/utils";
+  import { DATE_TIME_FORMAT, STATUS } from "../../helper/constants";
 
   let collections = [];
   let loading = true;
@@ -34,13 +39,17 @@
   const initCollections = async () => {
     loading = true;
     const response = await httpClient(fetchCollection, {
-      token: $token_store
+      token: $token_store,
     });
     if (response.status === 200) {
       collections = response.data.collections;
     }
     loading = false;
-  }
+  };
+
+  const handleRowClick = (row) => {
+    goto(`/collection/${row.detail._id}`);
+  };
 
   onMount(async () => {
     await initCollections();
@@ -50,95 +59,45 @@
 <div class="py-4 px-8 max-w-7xl mx-auto">
   <div class="mb-2 flex justify-between">
     <h1 class="text-2xl font-bold">Collections</h1>
-    <button
-      type="button"
-      class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+    <Button
       on:click={() => {
         goto("/collection/create");
       }}
     >
-      Add collection</button
+      Add collection</Button
     >
   </div>
   <div class="flex flex-col gap-4">
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading}
-        <Loading />
-      {:else if collections.length}
-      <div class="mb-5">
-        <input
-          type="text"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          placeholder="Search"
-        />
-        </div>
-        <div class="relative overflow-x-auto sm:rounded-lg">
-          <table class="w-full text-sm text-left rtl:text-right text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" class="flex items-center px-6 py-3">
-                  <div>Name</div>
-                  <!-- <button>
-                    <UpArrowIcon class="text-gray-500 w-6 h-6" />
-                  </button>
-                  <button>
-                    <DownArrowIcon class="text-gray-500 w-6 h-6" />
-                  </button> -->
-                </th>
-                <!-- <th scope="col" class="px-6 py-3"> Status </th> -->
-                <th scope="col" class="px-6 py-3"> Status </th>
-                <th scope="col" class="px-6 py-3"> Modified </th>
-                <th scope="col" class="px-6 py-3"> Action </th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each collections as collection}
-                <tr class="odd:bg-white even:bg-gray-50">
-                  <th
-                    scope="row"
-                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                  >
-                    {collection.name}
-                  </th>
-                  <td class="px-6 py-4">
-                    <span
-                      class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full"
-                      >{collection.status}</span
-                    >
-                  </td>
-                  <td class="px-6 py-4">
-                    {collection.updatedAt}
-                  </td>
-                  <td class="px-6 py-4">
-                    <a
-                      href={`/collection/${collection._id}`}
-                      class="font-medium text-blue-600 hover:underline">View</a
-                    >
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {:else}
-        <div class="flex justify-center">
-          <div>
-            <div>No collections to show!</div>
-            <!-- <button
-              type="button"
-              class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-              on:click={() => {
-                goto("/product/create");
-              }}
-            >
-              Add Product</button
-            > -->
-            <div></div>
-          </div>
-        </div>
-      {/if}
-    </div>
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Loading {loading}>
+          {#if collections.length}
+            <DataTable
+              headers={[
+                { accessor: "name", header: "Name" },
+                {
+                  accessor: "status",
+                  header: "Status",
+                  cell: ({ value }) => getByValue(STATUS, value),
+                },
+                {
+                  accessor: "updatedAt",
+                  header: "Modified",
+                  cell: ({ value }) => formatDate(value, DATE_TIME_FORMAT),
+                },
+              ]}
+              data={collections}
+              on:rowClick={handleRowClick}
+            />
+          {:else}
+            <div class="flex justify-center">
+              <div>
+                <div>No collections to show!</div>
+              </div>
+            </div>
+          {/if}
+        </Loading>
+      </Card.Content>
+    </Card.Root>
   </div>
 </div>

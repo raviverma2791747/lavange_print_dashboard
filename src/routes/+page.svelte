@@ -5,6 +5,10 @@
   import { httpClient } from "../helper/httpClient";
   import { token_store } from "../helper/store";
   import { format } from "date-fns";
+  import * as Card from "$lib/components/ui/card";
+  import { formatCurrency, formatDate } from "../helper/utils";
+  import { DATE_TIME_FORMAT } from "../helper/constants";
+  import Spinner from "../components/Spinner.svelte";
 
   let loading = true;
   let stats = {
@@ -29,23 +33,43 @@
 </script>
 
 <div class="py-4 px-8 max-w-7xl mx-auto">
-  <div class="grid grid-cols-4 gap-4">
-    <div
-      class="block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      <h1 class="text-xl font-semibold">
-        New Users {format(new Date(), "MMMM")}
-      </h1>
-      <div class="">{stats.users}</div>
-    </div>
-    <div
-      class="block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      <h1 class="text-xl font-semibold">
-        New Orders {format(new Date(), "MMMM")}
-      </h1>
-      <div class="">{stats.orders}</div>
-    </div>
+  <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <Card.Root>
+      <Card.Header>
+        <Card.Title class="text-xl font-semibold">
+          Users {format(new Date(), "MMMM")}
+        </Card.Title>
+      </Card.Header>
+      <Card.Content>
+        <Spinner {loading}>
+          {stats.users}
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+    <Card.Root>
+      <Card.Header>
+        <Card.Title class="text-xl font-semibold">
+          Orders {format(new Date(), "MMMM")}
+        </Card.Title>
+      </Card.Header>
+      <Card.Content>
+        <Spinner {loading}>
+          {stats.orders}
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+    <Card.Root>
+      <Card.Header>
+        <Card.Title class="text-xl font-semibold">
+          Revenue {format(new Date(), "MMMM")}
+        </Card.Title>
+      </Card.Header>
+      <Card.Content>
+        <Spinner {loading}>
+          {formatCurrency(stats.revenue ?? 0)}
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
   </div>
 </div>
 

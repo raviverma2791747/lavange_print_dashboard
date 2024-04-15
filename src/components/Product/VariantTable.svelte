@@ -2,12 +2,15 @@
   //@ts-nocheck
   import { createEventDispatcher, onMount } from "svelte";
   import EditVariantImage from "./EditVariantImage.svelte";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import * as Dialog from "$lib/components/ui/dialog";
+
   const dispatch = createEventDispatcher();
 
   export let variantSchema = [];
   export let variants = [];
   export let disabled = false;
-  let active_variant_index = -1;
 
   const uniqueName = (variant) => {
     const names = Object.keys(variant.attributes);
@@ -30,15 +33,11 @@
 
     return uname;
   };
-
-  console.log(variants);
 </script>
 
 <div class="relative overflow-x-auto">
-  <table
-    class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
-  >
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+  <table class="w-full text-sm text-left rtl:text-right">
+    <thead class="text-xs uppercase">
       <tr>
         <th scope="col" class="px-6 py-3"> Variant </th>
         <th scope="col" class="px-6 py-3"> Compare at Price </th>
@@ -50,25 +49,26 @@
     </thead>
     <tbody>
       {#each variants as variant, index}
-        <tr class="bg-white border-b">
-          <th
-            scope="row"
-            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-          >
+        <tr class=" border-b">
+          <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
             <div>{uniqueName(variant)}</div>
 
-            <button
-              {disabled}
-              on:click={() => {
-                active_variant_index = index;
-              }}
-              class="border px-2 py-1 rounded-lg h-24 w-24">Edit Images <br/>
-              {variant.assets.length}
-              </button
-            >
+            <Dialog.Root >
+              <Dialog.Trigger {disabled} class="border px-2 py-1 rounded-lg h-24 w-24">
+                Edit Images <br />
+                {variant.assets.length}
+              </Dialog.Trigger>
+              <Dialog.Content class="max-w-7xl">
+                <EditVariantImage
+                  bind:variants
+                  active_variant_index={index}
+                  {variantSchema}
+                />
+              </Dialog.Content>
+            </Dialog.Root>
           </th>
           <td class="px-6 py-4">
-            <input
+            <Input
               {disabled}
               bind:value={variant.compareAtPrice}
               on:blur={(e) => {
@@ -78,43 +78,39 @@
                 });
               }}
               type="number"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="Compare At Price"
             />
           </td>
           <td class="px-6 py-4">
-            <input
+            <Input
               {disabled}
               bind:value={variant.price}
               on:blur={(e) => {
                 dispatch("price", { variant, price: e.target.value });
               }}
               type="number"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="Price"
             />
           </td>
           <td class="px-6 py-4">
-            <input
+            <Input
               {disabled}
               bind:value={variant.sku}
               on:input={(e) => {
                 dispatch("sku", { variant });
               }}
               type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="SKU"
             />
           </td>
           <td class="px-6 py-4">
-            <input
+            <Input
               {disabled}
               bind:value={variant.sku}
               on:input={(e) => {
                 dispatch("sku", { variant });
               }}
               type="number"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               placeholder="Quantity"
             />
           </td>
@@ -125,6 +121,6 @@
   </table>
 </div>
 
-{#if active_variant_index !== -1}
-  <EditVariantImage bind:variants bind:active_variant_index variantSchema={variantSchema}  />
-{/if}
+<!-- {#if active_variant_index !== -1}
+  <EditVariantImage bind:variants bind:active_variant_index {variantSchema} />
+{/if} -->

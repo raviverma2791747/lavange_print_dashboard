@@ -10,13 +10,20 @@
   import slug from "slug";
   import ImageUpload from "../../../components/ImageUpload.svelte";
   import ImageView from "../../../components/ImageView.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import Label from "$lib/components/ui/Label/Label.svelte";
+  import * as Select from "$lib/components/ui/select";
+  import { getByValue, toastMessage } from "../../../helper/utils";
+  import { STATUS } from "../../../helper/constants";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
 
   let loading = true;
   let edit = false;
 
   let collection = {
     name: "",
-    status: "draft",
+    status: STATUS.DRAFT,
     asset: "",
     description: "",
     slug: "",
@@ -36,6 +43,9 @@
     });
 
     if (response.status === 200) {
+      toastMessage(
+        `Collection ${$page.params.id === "create" ? "created" : "updated"} successfully`
+      );
       goto(`/collection/${response.data.collection.id}`, {
         replaceState: true,
       });
@@ -61,8 +71,11 @@
   };
 
   $: {
-    if ($page.params._id !== "create") {
+    if ($page.params.id !== "create") {
       initCollection($page.params.id);
+    } else {
+      loading = false;
+      edit = true;
     }
   }
 </script>
@@ -72,153 +85,98 @@
     <h1 class="text-2xl font-bold">Collection</h1>
   </div>
   <div class="flex flex-col gap-4 mb-4">
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      <!-- <h3 class="text-normal font-semibold mb-2">collection</h3> -->
-
-      {#if loading === true}
-        <Loading />
-      {:else if loading === false}
-        <div class="mb-5">
-          <label for="name" class="block mb-2 text-sm font-medium text-gray-900"
-            >Name</label
-          >
-          <input
-            id="name"
-            type="text"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Title"
-            bind:value={collection.name}
-            disabled={!edit}
-          />
-        </div>
-
-        <div class="mb-5">
-          <label
-            for="status"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Select a status</label
-          >
-          <select
-            id="status"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            value={collection.status}
-            disabled={!edit}
-            on:change={(e) => (collection.status = e.target.value)}
-          >
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archive</option>
-          </select>
-        </div>
-
-        <div class="mb-5">
-          <label for="slug" class="block mb-2 text-sm font-medium text-gray-900"
-            >Slug</label
-          >
-          <div class="flex gap-2">
-            <input
-              id="slug"
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Loading {loading}>
+          <div class="mb-5">
+            <Label for="name">Name</Label>
+            <Input
+              id="name"
               type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              placeholder="Slug"
-              bind:value={collection.slug}
+              placeholder="Title"
+              bind:value={collection.name}
               disabled={!edit}
             />
-
-            <button
-              disabled={!edit}
-              class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-              on:click={handleSlug}
-            >
-              Generate
-            </button>
           </div>
-        </div>
 
-        <div class="mb-5">
-          <label
-            for="description"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Description</label
-          >
-          <Editor
-            disabled={!edit}
-            bind:content={collection.description}
-            placeholder="Description"
-          />
-          <!-- <textarea
-            id="description"
-            rows="5"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Description"
-            bind:value={collection.description}
-          /> -->
-        </div>
-
-        <div>
-          {#if collection.asset}
-            <div class="w-48 border">
-              <ImageView
-                disabled={!edit}
-                id={collection.asset}
-                on:delete={handleRemoveImage}
-              />
-            </div>
-          {:else}
-            <ImageUpload
+          <div class="mb-5">
+            <Label for="status">Select a status</Label>
+            <Select.Root
+              id="status"
               disabled={!edit}
-              on:success={(e) => (collection.asset = e.detail._id)}
-            />
-          {/if}
-        </div>
-      {/if}
-    </div>
-    <!-- <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading === true}
-        <Loading />{:else}
-        <h3 class="text-normal font-semibold mb-2">Products</h3>
+              selected={{
+                value: collection.status,
+                label: getByValue(STATUS, collection.status),
+              }}
+              onSelectedChange={(v) => {
+                v && (collection.status = v.value);
+              }}
+            >
+              <Select.Trigger>
+                <Select.Value class="capitalize" placeholder="Status" />
+              </Select.Trigger>
+              <Select.Content>
+                {#each Object.entries(STATUS) as [key, value]}
+                  <Select.Item {value} label={key} />
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
 
-        <div class="grid grid-cols-6 gap-4">
-          {#each collection.products as product}
-            <div class="border border-200 rounded-lg p-4">
-              <div>
-                {#if product.assets.length}
-                  <img
-                    class="h-auto max-w-full rounded-lg"
-                    src={product.assets[0].url}
-                  />
-                {/if}
-              </div>
-              <div>
-                {product.title}
-              </div>
+          <div class="mb-5">
+            <Label for="slug">Slug</Label>
+            <div class="flex gap-2">
+              <Input
+                id="slug"
+                type="text"
+                placeholder="Slug"
+                bind:value={collection.slug}
+                disabled={!edit}
+              />
+
+              <Button disabled={!edit} on:click={handleSlug}>Generate</Button>
             </div>
-          {/each}
-        </div>
-      {/if}
-    </div> -->
+          </div>
+
+          <div class="mb-5">
+            <Label for="description">Description</Label>
+            <Editor
+              disabled={!edit}
+              bind:content={collection.description}
+              placeholder="Description"
+            />
+          </div>
+
+          <div>
+            {#if collection.asset}
+              <div class="w-48 border">
+                <ImageView
+                  disabled={!edit}
+                  id={collection.asset}
+                  on:delete={handleRemoveImage}
+                />
+              </div>
+            {:else}
+              <ImageUpload
+                disabled={!edit}
+                on:success={(e) => (collection.asset = e.detail._id)}
+              />
+            {/if}
+          </div>
+        </Loading>
+      </Card.Content>
+    </Card.Root>
   </div>
 
   {#if edit}
-    <button
-      type="button"
-      class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-      on:click={handleSave}
-    >
-      Save</button
-    >
+    <Button on:click={handleSave}>Save</Button>
   {:else}
-    <button
-      class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+    <Button
       on:click={() => {
         edit = true;
       }}
     >
       Edit
-    </button>
+    </Button>
   {/if}
 </div>

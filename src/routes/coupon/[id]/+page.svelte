@@ -3,7 +3,12 @@
   import { page } from "$app/stores";
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
-  import { user_cache, product_cache, category_cache , collection_cache} from "../../../helper/cache_store";
+  import {
+    user_cache,
+    product_cache,
+    category_cache,
+    collection_cache,
+  } from "../../../helper/cache_store";
   import throttle from "lodash/throttle";
   import Autocomplete from "../../../components/Autocomplete.svelte";
   import {
@@ -12,7 +17,11 @@
     updateCoupon,
     getCoupon,
     fetchCategory,
-    fetchCollection
+    fetchCollection,
+    getUser,
+    getProduct,
+    getCategory,
+    getCollection,
   } from "../../../helper/endpoints";
   import Spinner from "../../../components/Spinner.svelte";
   import ProductPill from "../../../components/Coupon/ProductPill.svelte";
@@ -20,6 +29,36 @@
   import { goto } from "$app/navigation";
   import CategoryPill from "../../../components/Coupon/CategoryPill.svelte";
   import CollectionPill from "../../../components/Coupon/CollectionPill.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import * as Select from "$lib/components/ui/select";
+  import {
+    DATE_FORMAT,
+    DATE_TIME_FORMAT,
+    NUMBER_TYPE,
+    STATUS,
+  } from "../../../helper/constants";
+  import { formatDate, getByValue, toastMessage } from "../../../helper/utils";
+  import CalendarIcon from "lucide-svelte/icons/calendar";
+  import { cn } from "$lib/utils.ts";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import Calendar from "$lib/components/ui/calendar/calendar.svelte";
+  import * as Popover from "$lib/components/ui/popover";
+  import {
+    DateFormatter,
+    getLocalTimeZone,
+    CalendarDate,
+    today,
+  } from "@internationalized/date";
+  import { parseISO } from "date-fns";
+  import TagInput from "../../../components/TagInput.svelte";
+  import Badge from "$lib/components/ui/badge/badge.svelte";
+  import { X } from "lucide-svelte";
+
+  const df = new DateFormatter("en-US", {
+    dateStyle: "long",
+  });
 
   let loading = true;
   let edit = false;
@@ -31,20 +70,18 @@
   let suggested_products = [];
   let suggested_categories = [];
   let suggested_collections = [];
-  const CouponStatus = ["active", "draft", "archive"];
-  const DiscountType = ["fixed", "percentage"];
 
   let coupon = {
-    status: "draft",
+    status: STATUS.DRAFT,
     name: "",
     code: "",
     discount: {
       amount: 0,
-      type: "fixed",
+      type: NUMBER_TYPE.FIXED,
     },
     validity: {
-      startDate: Date.now().toString(),
-      endDate: Date.now().toString(),
+      startDate: today(getLocalTimeZone()),
+      endDate: today(getLocalTimeZone()),
     },
     redeem: {
       limit: 0,
@@ -71,75 +108,48 @@
     });
     if (response.status === 200) {
       coupon = response.data.coupon;
+      const startDate = new Date(parseISO(coupon.validity.startDate));
+      const endDate = new Date(parseISO(coupon.validity.endDate));
+      coupon = {
+        ...coupon,
+        validity: {
+          startDate: new CalendarDate(
+            startDate.getFullYear(),
+            startDate.getMonth() + 1,
+            startDate.getDate()
+          ),
+          endDate: new CalendarDate(
+            endDate.getFullYear(),
+            endDate.getMonth() + 1,
+            endDate.getDate()
+          ),
+        },
+      };
     }
-
-    loading = false;
   };
 
   const handleSave = async () => {
     loading = true;
     const response = await httpClient(updateCoupon, {
       method: "POST",
-      payload: coupon,
+      payload: {
+        ...coupon,
+        validity: {
+          startDate: coupon.validity.startDate.toDate(getLocalTimeZone()),
+          endDate: coupon.validity.endDate.toDate(getLocalTimeZone()),
+        },
+      },
       token: $token_store,
     });
     if (response.status === 200) {
-      goto(`/coupon/${response.data.coupon.id}`);
+      //goto(`/coupon/${response.data.coupon.id}`, { replaceState: true });
+      toastMessage(
+        `Coupon ${$page.params.id === "create" ? "created" : "updated"} successfully`
+      );
+      await initCoupon($page.params.id);
       loading = false;
       edit = false;
     }
-  };
-
-  const handleRemoveUser = async (id) => {
-    coupon.users = coupon.users.filter((user) => user !== id);
-  };
-
-  const handleAddUser = async (id) => {
-    if (coupon.users.includes(id)) {
-      user_input = "";
-      return;
-    }
-    coupon.users = [...coupon.users, id];
-    user_input = "";
-  };
-
-  const handleAddProduct = async (id) => {
-    if (coupon.products.includes(id)) {
-      product_input = "";
-      return;
-    }
-    coupon.products = [...coupon.products, id];
-    product_input = "";
-  };
-
-  const handleRemoveProduct = async (id) => {
-    coupon.products = coupon.products.filter((product) => product !== id);
-  };
-
-  const handleAddCategory = async (id) => {
-    if (coupon.categories.includes(id)) {
-      category_input = "";
-      return;
-    }
-    coupon.categories = [...coupon.categories, id];
-    category_input = "";
-  };
-
-  const handleRemoveCategory = async (id) => {
-    coupon.categories = coupon.categories.filter((category) => category !== id);
-  };
-
-  const handleAddCollection = async (id) => {
-    if (coupon.collections.includes(id)) {
-      collection_input = "";
-      return;
-    }
-    coupon.collections = [...coupon.collections, id];
-    collection_input = "";
-  };
-
-  const handleRemoveCollection = async (id) => {
-    coupon.collections = coupon.collections.filter((collection) => collection !== id);
   };
 
   const fetchUsers = async (search) => {
@@ -201,7 +211,7 @@
         if (!$category_cache.has(category._id)) {
           $category_cache.set(category._id, category);
         }
-      })
+      });
     }
   };
 
@@ -222,17 +232,110 @@
         if (!$collection_cache.has(collection._id)) {
           $collection_cache.set(collection._id, collection);
         }
-      })
+      });
     }
   };
 
-  $: {
+  const getCategoryById = async (id) => {
+    if ($category_cache.has(id)) {
+      return $category_cache.get(id);
+    } else {
+      const response = await httpClient(`${getCategory}/${id}`, {
+        token: $token_store,
+      });
+      if (response.status === 200) {
+        let category = response.data.category ?? null;
+
+        if (category) {
+          $category_cache.set(category._id, category);
+        }
+        return category;
+      }
+      return null;
+    }
+  };
+
+  const getCollectionById = async (id) => {
+    if ($collection_cache.has(id)) {
+      return $collection_cache.get(id);
+    } else {
+      const response = await httpClient(`${getCollection}/${id}`, {
+        token: $token_store,
+      });
+      if (response.status === 200) {
+        let collection = response.data.collection ?? null;
+
+        if (collection) {
+          $collection_cache.set(collection._id, collection);
+        }
+        return collection;
+      }
+      return null;
+    }
+  };
+
+  const getProductById = async (id) => {
+    if ($product_cache.has(id)) {
+      return $product_cache.get(id);
+    } else {
+      const response = await httpClient(`${getProduct}/${id}`, {
+        token: $token_store,
+      });
+      if (response.status === 200) {
+        let product = response.data.product ?? null;
+        if (product) {
+          $product_cache.set(product._id, product);
+        }
+        return product;
+      }
+      return null;
+    }
+  };
+
+  const getUserById = async (id) => {
+    if ($user_cache.has(id)) {
+      return $user_cache.get(id);
+    } else {
+      const response = await httpClient(`${getUser}/${id}`, {
+        token: $token_store,
+      });
+      if (response.status === 200) {
+        let user = response.data.user ?? null;
+        if (user) {
+          $user_cache.set(user._id, user);
+        }
+        return user;
+      }
+      return null;
+    }
+  };
+
+  const init = async (id) => {
     if ($page.params.id !== "create") {
-      initCoupon($page.params.id);
+      await initCoupon(id);
+
+      await Promise.all(coupon.users.map((user) => getUserById(user)));
+
+      await Promise.all(
+        coupon.products.map((product) => getProductById(product))
+      );
+
+      await Promise.all(
+        coupon.categories.map((category) => getCategoryById(category))
+      );
+      await Promise.all(
+        coupon.collections.map((collection) => getCollectionById(collection))
+      );
+
+      loading = false;
     } else {
       loading = false;
       edit = true;
     }
+  };
+
+  $: {
+    init($page.params.id);
   }
 
   const throttledFetchUsers = throttle(fetchUsers, 1000, {
@@ -270,7 +373,6 @@
   $: {
     throttledFetchCollections(collection_input);
   }
-
 </script>
 
 <div class="py-4 px-8 max-w-7xl mx-auto">
@@ -287,64 +389,60 @@
           > -->
   </div>
   <div class="flex flex-col gap-4 mb-4">
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading}
-        <Spinner />
-      {:else}
-        <h2 class="text-xl font-semibold mb-4">Basic Details</h2>
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h2 class="text-xl font-semibold mb-4">Basic Details</h2>
 
-        <div class="mb-4">
-          <label
-            for="status"
-            class="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Status</label
-          >
-          <select
-            id="status"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            bind:value={coupon.status}
-            disabled={!edit}
-          >
-            {#each CouponStatus as status}
-              <option value={status}>
-                {status}
-              </option>
-            {/each}
-          </select>
-        </div>
+          <div class="mb-4">
+            <Label for="status">Status</Label>
 
-        <div class="mb-5">
-          <label for="name" class="block mb-2 text-sm font-medium text-gray-900"
-            >Name</label
-          >
-          <input
-            id="name"
-            type="text"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Name"
-            bind:value={coupon.name}
-            disabled={!edit}
-          />
-        </div>
+            <Select.Root
+              disabled={!edit}
+              id="status"
+              selected={{
+                value: coupon.status,
+                label: getByValue(STATUS, coupon.status),
+              }}
+              onSelectedChange={(v) => {
+                v && (coupon.status = v.value);
+              }}
+            >
+              <Select.Trigger>
+                <Select.Value class="capitalize" placeholder="Status" />
+              </Select.Trigger>
+              <Select.Content>
+                {#each Object.entries(STATUS) as [key, value]}
+                  <Select.Item {value} label={key} />
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
 
-        <div class="mb-5">
-          <label for="code" class="block mb-2 text-sm font-medium text-gray-900"
-            >Code</label
-          >
-          <input
-            id="code"
-            type="text"
-            class="bg-gray-50 border uppercase border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Code"
-            bind:value={coupon.code}
-            disabled={$page.params.id !== "create" || !edit}
-          />
-        </div>
-      {/if}
-    </div>
+          <div class="mb-5">
+            <Label for="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Name"
+              bind:value={coupon.name}
+              disabled={!edit}
+            />
+          </div>
+
+          <div class="mb-5">
+            <Label for="code">Code</Label>
+            <Input
+              id="code"
+              type="text"
+              placeholder="Code"
+              bind:value={coupon.code}
+              disabled={$page.params.id !== "create" || !edit}
+            />
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
 
     <!-- <div
       class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
@@ -355,14 +453,14 @@
         <h2 class="text-xl font-semibold mb-4">Order Details</h2>
 
         <div class="mb-5">
-          <label
+          <Label
             for="discount-amount"
-            class="block mb-2 text-sm font-medium text-gray-900">Discount</label
+            >Discount</Label
           >
-          <input
+          <Input
             id="discount-amount"
             type="text"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            
             placeholder="Amount"
             bind:value={coupon.discount.amount}
             disabled={!edit}
@@ -371,379 +469,391 @@
       {/if}
     </div> -->
 
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading === true}
-        <Spinner />
-      {:else if loading === false}
-        <h2 class="text-xl font-semibold mb-4">Validity</h2>
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h2 class="text-xl font-semibold mb-4">Validity</h2>
 
-        <div class="grid grid-cols-2 gap-4 w-fit">
-          <div class="mb-5">
-            <label
-              for="validity-start"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Start Date</label
-            >
-            <input
-              id="validity-start"
-              type="date"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Amount"
-              bind:value={coupon.validity.startDate}
-              disabled={!edit}
-            />
+          <div class="grid grid-cols-2 gap-4 w-fit">
+            <div class="mb-5 flex flex-col">
+              <Label for="validity-start">Start Date</Label>
+
+              <Popover.Root>
+                <Popover.Trigger asChild let:builder>
+                  <Button
+                    disabled={!edit}
+                    variant="outline"
+                    class={cn(
+                      "w-[280px] justify-start text-left font-normal",
+                      !coupon.validity.startDate && "text-muted-foreground"
+                    )}
+                    builders={[builder]}
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {coupon.validity.startDate
+                      ? df.format(
+                          coupon.validity.startDate.toDate(getLocalTimeZone())
+                        )
+                      : "Pick a date"}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content class="w-auto p-0">
+                  <Calendar
+                    bind:value={coupon.validity.startDate}
+                    initialFocus
+                  />
+                </Popover.Content>
+              </Popover.Root>
+            </div>
+
+            <div class="mb-5 flex flex-col">
+              <Label for="validity-end">End Date</Label>
+              <Popover.Root>
+                <Popover.Trigger asChild let:builder>
+                  <Button
+                    disabled={!edit}
+                    variant="outline"
+                    class={cn(
+                      "w-[280px] justify-start text-left font-normal",
+                      !coupon.validity.endDate && "text-muted-foreground"
+                    )}
+                    builders={[builder]}
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {coupon.validity.endDate
+                      ? df.format(
+                          coupon.validity.endDate.toDate(getLocalTimeZone())
+                        )
+                      : "Pick a date"}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content class="w-auto p-0">
+                  <Calendar bind:value={coupon.validity.endDate} initialFocus />
+                </Popover.Content>
+              </Popover.Root>
+            </div>
           </div>
 
-          <div class="mb-5">
-            <label
-              for="validity-end"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >End Date</label
-            >
-            <input
-              id="validity-end"
-              type="date"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Amount"
-              bind:value={coupon.validity.endDate}
-              disabled={!edit}
-            />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 w-fit">
-          <div class="mb-5">
-            <label
-              for="redeem-limit"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Redeem Limit</label
-            >
-            <input
-              id="redeem-limit"
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Redeem limit"
-              bind:value={coupon.redeem.limit}
-              disabled={!edit}
-            />
-          </div>
-
-          <div class="mb-5">
-            <label
-              for="redeem-indi-limit"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Redeem Individual Limit</label
-            >
-            <input
-              id="redeem-indi-limit"
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Redeem Individual limit"
-              bind:value={coupon.redeem.individualLimit}
-              disabled={!edit}
-            />
-          </div>
-        </div>
-      {/if}
-    </div>
-
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading === true}
-        <Spinner />
-      {:else if loading === false}
-        <h2 class="text-xl font-semibold mb-4">Rules</h2>
-
-        <div class="grid grid-cols-2 gap-4 w-fit">
-          <div class="mb-5">
-            <label
-              for="discount-amount"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Discount</label
-            >
-            <input
-              id="discount-amount"
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Amount"
-              bind:value={coupon.discount.amount}
-              disabled={!edit}
-            />
-          </div>
-
-          <div class="mb-4">
-            <label
-              for="discount-type"
-              class="block mb-2 text-sm font-medium text-gray-900"
-            >
-              Type</label
-            >
-            <select
-              id="discount-type"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              bind:value={coupon.discount.type}
-              disabled={!edit}
-            >
-              {#each DiscountType as status}
-                <option value={status}>
-                  {status}
-                </option>
-              {/each}
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 w-fit">
-          <div class="mb-5">
-            <label
-              for="quantity-min"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Minimum Quantity</label
-            >
-            <input
-              id="quantity-min"
-              type="number"
-              min="1"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Minium Quantity"
-              bind:value={coupon.quantity.minimum}
-              disabled={!edit}
-            />
-          </div>
-
-          <div class="mb-5">
-            <label
-              for="quantity-max"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Maximum Quantity</label
-            >
-            <input
-              id="quantity-max"
-              type="number"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Minium Quantity"
-              bind:value={coupon.quantity.maximum}
-              disabled={!edit}
-            />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 w-fit">
-          <div class="mb-5">
-            <label
-              for="amount-min"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Minimum Amount</label
-            >
-            <input
-              id="amount-min"
-              type="number"
-              min="0"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Minium Amount"
-              bind:value={coupon.amount.minimum}
-              disabled={!edit}
-            />
-          </div>
-
-          <div class="mb-5">
-            <label
-              for="amount-max"
-              class="block mb-2 text-sm font-medium text-gray-900"
-              >Maximum Amount</label
-            >
-            <input
-              id="amount-max"
-              type="number"
-              min="0"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-              placeholder="Maximum Amount"
-              bind:value={coupon.amount.maximum}
-              disabled={!edit}
-            />
-          </div>
-        </div>
-
-        <div class="mb-5">
-          <label
-            for="users"
-            class="block mb-2 text-sm font-medium text-gray-900">Users</label
-          >
-
-          <div class="border rounded-lg p-2 flex gap-4 flex-wrap items-center">
-            {#each coupon.users as user}
-              <UserPill
-                id={user}
-                {edit}
-                on:remove={() => handleRemoveUser(user)}
+          <div class="grid grid-cols-2 gap-4 w-fit">
+            <div class="mb-5">
+              <Label for="redeem-limit">Redeem Limit</Label>
+              <Input
+                id="redeem-limit"
+                type="text"
+                placeholder="Redeem limit"
+                bind:value={coupon.redeem.limit}
+                disabled={!edit}
               />
-            {/each}
+            </div>
 
-            <div class="grow">
-              <Autocomplete
-                placeholder="Search User"
-                bind:search={user_input}
-                items={suggested_users}
-                on:selected={(e) => {
-                  handleAddUser(e.detail.item._id);
+            <div class="mb-5">
+              <Label for="redeem-indi-limit">Redeem Individual Limit</Label>
+              <Input
+                id="redeem-indi-limit"
+                type="text"
+                placeholder="Redeem Individual limit"
+                bind:value={coupon.redeem.individualLimit}
+                disabled={!edit}
+              />
+            </div>
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h2 class="text-xl font-semibold mb-4">Rules</h2>
+
+          <div class="grid grid-cols-2 gap-4 w-fit">
+            <div class="mb-5">
+              <Label for="discount-amount">Discount</Label>
+              <Input
+                id="discount-amount"
+                type="text"
+                placeholder="Amount"
+                bind:value={coupon.discount.amount}
+                disabled={!edit}
+              />
+            </div>
+
+            <div class="mb-4">
+              <Label for="discount-type">Type</Label>
+
+              <Select.Root
+                disabled={!edit}
+                selected={{
+                  value: coupon.discount.type,
+                  label: getByValue(NUMBER_TYPE, coupon.discount.type),
+                }}
+                onSelectedChange={(v) => {
+                  v && (coupon.discount.type = v.value);
                 }}
               >
-                <svelte:fragment slot="item" let:item
-                  >{item.username}</svelte:fragment
-                >
-              </Autocomplete>
+                <Select.Trigger>
+                  <Select.Value class="capitalize" placeholder="Status" />
+                </Select.Trigger>
+                <Select.Content>
+                  {#each Object.entries(NUMBER_TYPE) as [key, value]}
+                    <Select.Item {value} label={key} />
+                  {/each}
+                </Select.Content>
+              </Select.Root>
             </div>
-            <!-- <input
-              class="outline-none"
-              type="text"
-              bind:value={user_input}
-              on:keydown={(e) => handleAddUser(e)}
-              placeholder="Enter username"
-            /> -->
           </div>
-        </div>
 
-        <div class="mb-5">
-          <label
-            for="products"
-            class="block mb-2 text-sm font-medium text-gray-900">Products</label
-          >
-
-          <div class="border rounded-lg p-2 flex gap-4 flex-wrap items-center">
-            {#each coupon.products as product}
-              <ProductPill
-                id={product}
-                {edit}
-                on:remove={() => handleRemoveProduct(product)}
+          <div class="grid grid-cols-2 gap-4 w-fit">
+            <div class="mb-5">
+              <Label for="quantity-min">Minimum Quantity</Label>
+              <Input
+                id="quantity-min"
+                type="number"
+                min="1"
+                placeholder="Minium Quantity"
+                bind:value={coupon.quantity.minimum}
+                disabled={!edit}
               />
-            {/each}
-
-            <div class="grow">
-              <Autocomplete
-                placeholder="Search Products"
-                bind:search={product_input}
-                items={suggested_products}
-                on:selected={(e) => {
-                  handleAddProduct(e.detail.item._id);
-                }}
-              >
-                <svelte:fragment slot="item" let:item
-                  >{item.title}</svelte:fragment
-                >
-              </Autocomplete>
             </div>
-            <!-- <input
-              class="outline-none"
-              type="text"
-              bind:value={user_input}
-              on:keydown={(e) => handleAddUser(e)}
-              placeholder="Enter username"
-            /> -->
-          </div>
-        </div>
 
-        <div class="mb-5">
-          <label
-            for="categories"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Categories</label
-          >
-
-          <div class="border rounded-lg p-2 flex gap-4 flex-wrap items-center">
-            {#each coupon.categories as category}
-              <CategoryPill
-                id={category}
-                {edit}
-                on:remove={() => handleRemoveCategory(category)}
+            <div class="mb-5">
+              <Label for="quantity-max">Maximum Quantity</Label>
+              <Input
+                id="quantity-max"
+                type="number"
+                placeholder="Minium Quantity"
+                bind:value={coupon.quantity.maximum}
+                disabled={!edit}
               />
-            {/each}
-
-            <div class="grow">
-              <Autocomplete
-                placeholder="Search Category"
-                bind:search={category_input}
-                items={suggested_categories}
-                on:selected={(e) => {
-                  handleAddCategory(e.detail.item._id);
-                }}
-              >
-                <svelte:fragment slot="item" let:item
-                  >{item.name}</svelte:fragment
-                >
-              </Autocomplete>
             </div>
-            <!-- <input
-              class="outline-none"
-              type="text"
-              bind:value={user_input}
-              on:keydown={(e) => handleAddUser(e)}
-              placeholder="Enter username"
-            /> -->
           </div>
-        </div>
 
-        <div class="mb-5">
-          <label
-            for="collections"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Collections</label
-          >
-
-          <div class="border rounded-lg p-2 flex gap-4 flex-wrap items-center">
-            {#each coupon.collections as collection}
-              <CollectionPill
-                id={collection}
-                {edit}
-                on:remove={() => handleRemoveCollection(collection)}
+          <div class="grid grid-cols-2 gap-4 w-fit">
+            <div class="mb-5">
+              <Label for="amount-min">Minimum Amount</Label>
+              <Input
+                id="amount-min"
+                type="number"
+                min="0"
+                placeholder="Minium Amount"
+                bind:value={coupon.amount.minimum}
+                disabled={!edit}
               />
-            {/each}
-
-            <div class="grow">
-              <Autocomplete
-                placeholder="Search Collection"
-                bind:search={collection_input}
-                items={suggested_collections}
-                on:selected={(e) => {
-                  handleAddCollection(e.detail.item._id);
-                }}
-              >
-                <svelte:fragment slot="item" let:item
-                  >{item.name}</svelte:fragment
-                >
-              </Autocomplete>
             </div>
-            <!-- <input
-              class="outline-none"
-              type="text"
-              bind:value={user_input}
-              on:keydown={(e) => handleAddUser(e)}
-              placeholder="Enter username"
-            /> -->
+
+            <div class="mb-5">
+              <Label for="amount-max">Maximum Amount</Label>
+              <Input
+                id="amount-max"
+                type="number"
+                min="0"
+                placeholder="Maximum Amount"
+                bind:value={coupon.amount.maximum}
+                disabled={!edit}
+              />
+            </div>
           </div>
-        </div>
-      {/if}
-    </div>
+
+          <div class="mb-5">
+            <Label for="users">Users</Label>
+
+            <TagInput tags={coupon.users} disabled={!edit}>
+              <svelte:fragment slot="tag" let:tag>
+                <Badge class="text-base" variant="primary">
+                  {$user_cache.get(tag)?.username ?? tag}
+                  <Button
+                    disabled={!edit}
+                    size="icon"
+                    variant="ghost"
+                    on:click={() => {
+                      coupon.users = coupon.users.filter((t) => t !== tag);
+                    }}
+                  >
+                    <X class="w-4 h-4" />
+                  </Button>
+                </Badge>
+              </svelte:fragment>
+              <svelte:fragment slot="input" let:search_input>
+                <Autocomplete
+                  disabled={!edit}
+                  class="border-0"
+                  placeholder="Search User"
+                  search={search_input}
+                  on:input={async (e) => {
+                    await fetchUsers(e.detail.target.value);
+                  }}
+                  items={suggested_users}
+                  on:selected={(e) => {
+                    if (coupon.users.includes(e.detail.item._id)) {
+                      return;
+                    }
+                    coupon.users = [...coupon.users, e.detail.item._id];
+                  }}
+                >
+                  <svelte:fragment slot="item" let:item
+                    >{item.username}</svelte:fragment
+                  >
+                </Autocomplete>
+              </svelte:fragment>
+            </TagInput>
+          </div>
+
+          <div class="mb-5">
+            <Label for="products">Products</Label>
+
+            <TagInput tags={coupon.products} disabled={!edit}>
+              <svelte:fragment slot="tag" let:tag>
+                <Badge class="text-base" variant="primary">
+                  {$product_cache.get(tag)?.title ?? tag}
+                  <Button
+                    disabled={!edit}
+                    size="icon"
+                    variant="ghost"
+                    on:click={() => {
+                      coupon.products = coupon.products.filter(
+                        (t) => t !== tag
+                      );
+                    }}
+                  >
+                    <X class="w-4 h-4" />
+                  </Button>
+                </Badge>
+              </svelte:fragment>
+              <svelte:fragment slot="input" let:search_input>
+                <Autocomplete
+                  disabled={!edit}
+                  class="border-0"
+                  placeholder="Search Product"
+                  search={search_input}
+                  on:input={async (e) => {
+                    await fetchProducts(e.detail.target.value);
+                  }}
+                  items={suggested_products}
+                  on:selected={(e) => {
+                    if (coupon.products.includes(e.detail.item._id)) {
+                      return;
+                    }
+                    coupon.products = [...coupon.products, e.detail.item._id];
+                  }}
+                >
+                  <svelte:fragment slot="item" let:item
+                    >{item.title}</svelte:fragment
+                  >
+                </Autocomplete>
+              </svelte:fragment>
+            </TagInput>
+          </div>
+
+          <div class="mb-5">
+            <Label for="categories">Categories</Label>
+
+            <TagInput tags={coupon.categories} disabled={!edit}>
+              <svelte:fragment slot="tag" let:tag>
+                <Badge class="text-base" variant="primary">
+                  {$category_cache.get(tag)?.name ?? tag}
+                  <Button
+                    disabled={!edit}
+                    size="icon"
+                    variant="ghost"
+                    on:click={() => {
+                      coupon.categories = coupon.categories.filter(
+                        (t) => t !== tag
+                      );
+                    }}
+                  >
+                    <X class="w-4 h-4" />
+                  </Button>
+                </Badge>
+              </svelte:fragment>
+              <svelte:fragment slot="input" let:search_input>
+                <Autocomplete
+                  disabled={!edit}
+                  class="border-0"
+                  placeholder="Search Category"
+                  search={search_input}
+                  on:input={async (e) => {
+                    await fetchCategories(e.detail.target.value);
+                  }}
+                  items={suggested_categories}
+                  on:selected={(e) => {
+                    if (coupon.categories.includes(e.detail.item._id)) {
+                      return;
+                    }
+                    coupon.categories = [
+                      ...coupon.categories,
+                      e.detail.item._id,
+                    ];
+                  }}
+                >
+                  <svelte:fragment slot="item" let:item
+                    >{item.name}</svelte:fragment
+                  >
+                </Autocomplete>
+              </svelte:fragment>
+            </TagInput>
+          </div>
+
+          <div class="mb-5">
+            <Label for="collections">Collections</Label>
+            <TagInput tags={coupon.collections} disabled={!edit}>
+              <svelte:fragment slot="tag" let:tag>
+                <Badge class="text-base" variant="primary">
+                  {$collection_cache.get(tag)?.name ?? tag}
+                  <Button
+                    disabled={!edit}
+                    size="icon"
+                    variant="ghost"
+                    on:click={() => {
+                      coupon.collections = coupon.collections.filter(
+                        (t) => t !== tag
+                      );
+                    }}
+                  >
+                    <X class="w-4 h-4" />
+                  </Button>
+                </Badge>
+              </svelte:fragment>
+              <svelte:fragment slot="input" let:search_input>
+                <Autocomplete
+                  disabled={!edit}
+                  class="border-0"
+                  placeholder="Search Collection"
+                  search={search_input}
+                  on:input={async (e) => {
+                    await fetchCollections(e.detail.target.value);
+                  }}
+                  items={suggested_collections}
+                  on:selected={(e) => {
+                    if (coupon.collections.includes(e.detail.item._id)) {
+                      return;
+                    }
+                    coupon.collections = [
+                      ...coupon.collections,
+                      e.detail.item._id,
+                    ];
+                  }}
+                >
+                  <svelte:fragment slot="item" let:item
+                    >{item.name}</svelte:fragment
+                  >
+                </Autocomplete>
+              </svelte:fragment>
+            </TagInput>
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
   </div>
 
-  <button
-    class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-    class:hidden={edit}
-    on:click={() => {
-      edit = true;
-    }}
-  >
-    Edit
-  </button>
-
-  <button
-    type="button"
-    class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-    on:click={handleSave}
-    class:hidden={!edit}
-  >
-    Save</button
-  >
+  {#if edit}
+    <Button on:click={handleSave}>Save</Button>
+  {:else}
+    <Button
+      on:click={() => {
+        edit = true;
+      }}
+    >
+      Edit
+    </Button>
+  {/if}
 </div>

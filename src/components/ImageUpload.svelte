@@ -55,7 +55,7 @@
   </div>
 {:else}
   <div
-    class="border border-dashed border-gray-200 rounded-lg h-48 w-48 flex justify-center items-center"
+    class="border border-dashed  rounded-lg h-48 w-48 flex justify-center items-center"
   >
     <div class="text-center">
       <label
@@ -71,8 +71,8 @@
         Add
       </label>
 
-      <div class="text-sm text-gray-400">Add Image</div>
-      <div class="text-sm text-gray-400">Max. 5mb</div>
+      <div class="text-sm ">Add Image</div>
+      <div class="text-sm ">Max. 5mb</div>
     </div>
   </div>
 {/if}

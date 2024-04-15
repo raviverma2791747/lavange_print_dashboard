@@ -5,12 +5,18 @@
   import EditVariantConfigSchemaOptionForm from "./EditVariantConfigSchemaOptionForm.svelte";
   import VariantTable from "./VariantTable.svelte";
   import { createEventDispatcher } from "svelte";
+  import * as Select from "$lib/components/ui/select";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import { getByValue } from "../../helper/utils";
+  import { STATUS } from "../../helper/constants";
+  import Button from "$lib/components/ui/button/button.svelte";
+
   const dispatch = createEventDispatcher();
 
   let create = false;
   let edit_variant_schema_option_index = -1;
   let variantConfig = {
-    status: "draft",
+    status: STATUS.DRAFT,
     variantSchema: [],
     variants: [],
   };
@@ -176,20 +182,29 @@
   }
 </script>
 
-<div class="border border-gray-200 rounded-lg p-4">
+<div class="border rounded-lg p-4">
   <div class="mb-4">
-    <label for="status" class="block mb-2 text-sm font-medium text-gray-900">
-      Status
-    </label>
-    <select
+    <Label for="status">Status</Label>
+
+    <Select.Root
       disabled={create}
-      bind:value={variantConfig.status}
-      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+      selected={{
+        value: variantConfig.status,
+        label: getByValue(STATUS, variantConfig.status),
+      }}
+      onSelectedChange={(v) => {
+        v && (variantConfig.status = v.value);
+      }}
     >
-      <option value="draft">Draft</option>
-      <option value="active">Active</option>
-      <option value="archive">Archive</option>
-    </select>
+      <Select.Trigger>
+        <Select.Value class="capitalize" placeholder="Status" />
+      </Select.Trigger>
+      <Select.Content>
+        {#each Object.entries(STATUS) as [key, value]}
+          <Select.Item {value} label={key} />
+        {/each}
+      </Select.Content>
+    </Select.Root>
   </div>
 
   <div class="mb-4 flex flex-col gap-4">
@@ -226,13 +241,13 @@
     {/if}
   </div>
 
-  <button
-    class="text-purple-500 inline-flex cursor-pointer disabled:text-purple-300 mb-4"
+  <Button
+    variant="ghost"
     on:click={handleCreateVariantConfigSchemaOption}
     disabled={create || edit_variant_schema_option_index !== -1}
   >
     Add Variant Schema Option
-  </button>
+  </Button>
 
   {#if variantConfig.variants.length > 0}
     <div class="mb-4">
@@ -244,16 +259,10 @@
   {/if}
 
   <div class="flex gap-4">
-    <button
-      class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
+    <Button
       disabled={create || edit_variant_schema_option_index !== -1 || !valid}
-      on:click={handleSave}>Done</button
+      on:click={handleSave}>Done</Button
     >
-    <button
-      class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-      on:click={handleCancel}
-    >
-      Cancel
-    </button>
+    <Button on:click={handleCancel}>Cancel</Button>
   </div>
 </div>

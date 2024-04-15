@@ -1,15 +1,17 @@
 <script>
   //@ts-nocheck
-  import { onMount } from "svelte";
   import Loading from "../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
-  import DataTable from "../../components/DataTable/DataTable.svelte";
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchOrder } from "../../helper/endpoints";
   import { token_store } from "../../helper/store";
-  import CopyIcon from "../../components/svg/CopyIcon.svelte";
-  import { formatCurrency } from "../../helper/utils";
+  import { formatCurrency, getByValue } from "../../helper/utils";
+  import * as Card from "$lib/components/ui/card";
+  import DataTable from "../../components/DataTable.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { ORDER_STATUS } from "../../helper/constants";
+  import { addPagination } from "svelte-headless-table/plugins";
 
   let orders = [];
   let loading = true;
@@ -30,110 +32,67 @@
     loading = false;
   };
 
-  onMount(async () => {
-    await initOrders();
-  });
+  $: initOrders();
 </script>
 
 <div class="py-4 px-8 max-w-7xl mx-auto">
   <div class="mb-2 flex justify-between">
     <h1 class="text-2xl font-bold">Orders</h1>
-    <button
-      type="button"
-      class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+    <Button
       on:click={() => {
         goto("/order/create");
       }}
     >
-      Add Order</button
+      Add Order</Button
     >
   </div>
-  <div class="bg-white w-full border border-gray-200 rounded-lg p-6 shadow">
-    <Loading {loading}>
-      {#if orders.length}
-        <DataTable
-          headers={[
-            { key: "_id", value: "Order #" },
-            // { key: "status", value: "Status" },
-            {
-              key: "user",
-              value: "Customer",
-              display: (user) => user.username,
-            },
-            {
-              key:"status",
-              value: "Status"
-            },
-            {
-              key: "items",
-              value: "total",
-              display: (items) =>
-                formatCurrency(items.reduce((acc, item) => acc + item.price, 0)),
-            },
-            // {
-            //   key: "products",
-            //   value: "Quantity",
-            //   display: (products) =>
-            //     products.reduce((acc, product) => acc + product.quantity, 0),
-            // },
-            {
-              key: "updatedAt",
-              value: "Modified",
-              display: (updatedAt) => format(updatedAt, "yyyy-MM-dd HH:mm:ss"),
-            },
-          ]}
-          rows={orders.map((order) => {
-            return { ...order, id: order._id };
-          }).sort((a, b) => {
-            return new Date(b.updatedAt) - new Date(a.updatedAt);
-          })}
-          on:click:row={handleRowClick}
-        >
-          <div class="mb-5">
-            <input
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              placeholder="Search"
-            />
-          </div>
-
-          <!-- <svelte:fragment slot="cell-header" let:header>
-          {#if header.key === "title"}
-            ok
-          {:else}
-            {header.value}
-          {/if}
-        </svelte:fragment> -->
-
-          <svelte:fragment slot="cell" let:row let:cell>
-            {#if cell.key === "status"}
-              <span
-                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full"
-                >{cell.value}</span
-              >
-            {:else if cell.key === "_id"}
-            <div class="flex gap-2">
-              <span class="text-sm font-bold uppercase text-blue-500"
-                >{cell.value}</span
-              >
-              <button
-                on:click={(e) => {
-                  e.stopImmediatePropagation();
-                  navigator.clipboard.writeText(cell.value);
-                }}><CopyIcon class="w-6 h-6 text-gray-500" /></button
-              >
-                            
-            </div>
-            {:else}
-              {cell.display ? cell.display(cell.value, row) : cell.value}
-            {/if}
-          </svelte:fragment>
-        </DataTable>
-      {:else}
-        <div class="flex justify-center">
-          <div>
-            <div>No orders to show!</div>
-            <!-- <button
+  <Card.Root>
+    <Card.Content class="p-4">
+      <Loading {loading}>
+        {#if orders.length}
+          <DataTable
+            headers={[
+              { accessor: "_id", header: "Order #" },
+              {
+                accessor: "user",
+                header: "Customer",
+                cell: ({ value }) => value.username,
+              },
+              {
+                accessor: "status",
+                header: "Status",
+                cell: ({ value }) => {
+                  return getByValue(ORDER_STATUS, value);
+                }
+              },
+              {
+                accessor: "items",
+                header: "total",
+                cell: ({ value }) =>
+                  formatCurrency(
+                    value.reduce((acc, item) => acc + item.price, 0)
+                  ),
+              },
+              {
+                accessor: "updatedAt",
+                header: "Modified",
+                cell: ({ value }) => format(value, "yyyy-MM-dd HH:mm:ss"),
+              },
+            ]}
+            data={orders
+              .map((order) => {
+                return { ...order, id: order._id };
+              })
+              .sort((a, b) => {
+                return new Date(b.updatedAt) - new Date(a.updatedAt);
+              })}
+            on:rowClick={handleRowClick}
+          />
+        {:else}
+          <div class="flex justify-center">
+            <div>
+              <div>No orders to show!</div>
+              <!-- <button
             type="button"
             class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
             on:click={() => {
@@ -142,10 +101,11 @@
           >
             Add Product</button
           > -->
-            <div></div>
+              <div></div>
+            </div>
           </div>
-        </div>
-      {/if}
-    </Loading>
-  </div>
+        {/if}
+      </Loading>
+    </Card.Content>
+  </Card.Root>
 </div>

@@ -44,3 +44,6 @@ export const getCoupon = "/private/coupon";
 export const updateCoupon = "/private/coupon";
 export const getPolicy = "/private/config/policy";
 export const updatePolicy = "/private/config/policy";
+export const getFacet = "/private/facet";
+export const fetchFacet = "/private/facet";
+export const updateFacet = "/private/facet";

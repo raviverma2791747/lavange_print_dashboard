@@ -5,6 +5,12 @@
   import ArrowDownwardIcon from "../svg/ArrowDownwardIcon.svelte";
   import ArrowUpwardIcon from "../svg/ArrowUpwardIcon.svelte";
   import DeleteIcon from "../svg/DeleteIcon.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import * as Select from "$lib/components/ui/select";
+  import { FACET_TYPE, STATUS } from "../../helper/constants";
+  import { getByValue } from "../../helper/utils";
 
   const dispatch = createEventDispatcher();
 
@@ -13,7 +19,7 @@
   let variantSchemaOption = {
     displayName: "",
     name: "",
-    type: "other",
+    type: FACET_TYPE.OTHER,
     options: [],
   };
 
@@ -23,7 +29,7 @@
       {
         displayName: "",
         value: "",
-        status: "draft",
+        status: STATUS.DRAFT,
       },
     ];
   };
@@ -103,7 +109,7 @@
     }
 
     //check if atleast one option is active in options
-    if (!data.options.some((option) => option.status === "active")) {
+    if (!data.options.some((option) => option.status === STATUS.ACTIVE)) {
       console.log("no active option in options");
       return false;
     }
@@ -126,47 +132,50 @@
 
 <div class="flex gap-2 py-3 grow px-6">
   <div class="flex items-start">
-    <button class="disabled:text-gray-500" disabled>
+    <Button variant="ghost" disabled>
       <ArrowUpwardIcon class="w-6 h-6" />
-    </button>
-    <button class="disabled:text-gray-500" disabled>
+    </Button>
+    <Button variant="ghost" disabled>
       <ArrowDownwardIcon class="w-6 h-6" />
-    </button>
+    </Button>
   </div>
   <div class="grow">
     <div class="mb-4">
-      <label for="title" class="block mb-2 text-sm font-medium text-gray-900"
-        >Option name</label
-      >
+      <Label for="title">Option name</Label>
       <div class="flex gap-1">
-        <input
+        <Input
           type="text"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
           placeholder="Display name"
           bind:value={variantSchemaOption.displayName}
         />
-        <input
+        <Input
           type="text"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
           placeholder="Name"
           bind:value={variantSchemaOption.name}
         />
-        <select
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          value={variantSchemaOption.type}
-          on:change={(e) => (variantSchemaOption.type = e.target.value)}
+
+        <Select.Root
+          selected={{
+            value: variantSchemaOption.type,
+            label: getByValue(FACET_TYPE, variantSchemaOption.type),
+          }}
+          onSelectedChange={(v) => {
+            v && (variantSchemaOption.type = v.value);
+          }}
         >
-          <option value="color">Color</option>
-          <option value="size">Size</option>
-          <option value="material">Material</option>
-          <option value="other">Other</option>
-        </select>
+          <Select.Trigger>
+            <Select.Value class="capitalize" placeholder="Status" />
+          </Select.Trigger>
+          <Select.Content>
+            {#each Object.entries(FACET_TYPE) as [key, value]}
+              <Select.Item {value} label={key} />
+            {/each}
+          </Select.Content>
+        </Select.Root>
       </div>
     </div>
     <div class="flex flex-col gap-1">
-      <label for="title" class="block mb-2 text-sm font-medium text-gray-900"
-        >Option values</label
-      >
+      <Label for="title">Option values</Label>
       <div class="flex flex-col gap-2">
         {#each variantSchemaOption.options as option, index}
           <CreateVariantConfigSchemaOptionValueForm
@@ -180,36 +189,14 @@
             type={variantSchemaOption.type}
           />
         {/each}
-        <button
-          class="bg-blue-500 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          on:click={handleCreateVariantConfigSchemaOptionValue}
-        >
+        <Button on:click={handleCreateVariantConfigSchemaOptionValue}>
           Add value
-        </button>
+        </Button>
       </div>
       <div class="flex gap-2">
-        <button
-          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-          on:click={handleSave}
-          disabled={!valid}
-        >
-          Done
-        </button>
-        <button
-          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          on:click={handleCancel}
-        >
-          Cancel
-        </button>
+        <Button on:click={handleSave} disabled={!valid}>Done</Button>
+        <Button variant="outline" on:click={handleCancel}>Cancel</Button>
       </div>
     </div>
   </div>
-  <!-- <div>
-    <button
-      class=" focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-500"
-      on:click={handleDelete}
-    >
-      <DeleteIcon class="w-6 h-6" />
-    </button>
-  </div> -->
 </div>

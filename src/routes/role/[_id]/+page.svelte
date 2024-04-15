@@ -4,10 +4,16 @@
   import { v4 as uuidv4 } from "uuid";
   import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import Loading from "../../../components/Spinner.svelte";
+  import Spinner from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { fetchRight, getRole, updateRole } from "../../../helper/endpoints";
   import { token_store } from "../../../helper/store";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { toastMessage } from "../../../helper/utils";
+  import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
 
   let loading = true;
   let edit = false;
@@ -42,19 +48,28 @@
   };
 
   const handleSave = async () => {
-    await httpClient(updateRole, {
+    loading = true;
+    const response = await httpClient(updateRole, {
       method: "POST",
       body: role,
       token: $token_store,
     });
+    if (response.status === 200) {
+      toastMessage("Role updated successfully");
+      goto("/role");
+    }
+    loading = false;
   };
 
-  onMount(async () => {
-    await initRights();
-  });
-
   $: {
-    initRole($page.params._id);
+    if ($page.params._id !== "create") {
+      initRights();
+      initRole($page.params._id);
+    } else {
+      initRights();
+      loading = false;
+      edit = true;
+    }
   }
 </script>
 
@@ -72,49 +87,58 @@
           > -->
   </div>
   <div class="flex flex-col gap-4 mb-4">
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      <!-- <h3 class="text-normal font-semibold mb-2">role</h3> -->
-
-      {#if loading === true}
-        <Loading />
-      {:else if loading === false}
-        <div class="mb-5">
-          <label for="name" class="block mb-2 text-sm font-medium text-gray-900"
-            >name</label
-          >
-          <input
-            type="text"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="name"
-            bind:value={role.name}
-            disabled={!edit}
-          />
-        </div>
-        <div class="mb-5 flex flex-col gap-2">
-          {#each rights as right}
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id={right} class="h-4 w-4" bind:group={role.rights} value={right} />
-              <label
-                for={right}
-                class="block text-sm font-medium text-gray-900"
-              >
-                {right.split("_").join(" ")}
-              </label>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
+    <Card.Root>
+      <Card.Content class="p-4">
+        <!-- <h3 class="text-normal font-semibold mb-2">role</h3> -->
+        <Spinner {loading}>
+          <div class="mb-5">
+            <Label for="name">name</Label>
+            <Input
+              type="text"
+              placeholder="name"
+              bind:value={role.name}
+              disabled={!edit}
+            />
+          </div>
+          <div class="mb-5 flex flex-col gap-2">
+            {#each rights as right}
+              <div class="flex items-center gap-2">
+                <Checkbox
+                  checked={role.rights.includes(right)}
+                  onCheckedChange={(v) => {
+                    if (v) {
+                      role.rights = [...role.rights, right];
+                    } else {
+                      role.rights = role.rights.filter((r) => r !== right);
+                    }
+                  }}
+                  disabled={!edit}
+                />
+                <!-- <Input
+                  type="checkbox"
+                  id={right}
+                  class="h-4 w-4"
+                  bind:group={role.rights}
+                  value={right}
+                /> -->
+                <Label for={right}>
+                  {right.split("_").join(" ")}
+                </Label>
+              </div>
+            {/each}
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
   </div>
 
-  <button
-    type="button"
-    class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-    on:click={handleSave}
-    class:hidden={!edit}
-  >
-    Save</button
-  >
+  {#if edit}
+    <Button on:click={handleSave}>Save</Button>
+  {:else}
+    <Button
+      on:click={() => {
+        edit = true;
+      }}>Edit</Button
+    >
+  {/if}
 </div>
