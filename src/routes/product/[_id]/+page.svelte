@@ -3,7 +3,7 @@
   import { page } from "$app/stores";
   import { PUBLIC_API_URI } from "$env/static/public";
   import { onMount } from "svelte";
-  import Loading from "../../../components/Spinner.svelte";
+  import Spinner from "../../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
   import { v4 as uuidv4 } from "uuid";
   import AddIcon from "../../../components/svg/AddIcon.svelte";
@@ -25,8 +25,19 @@
   import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
   import ImageUpload from "../../../components/ImageUpload.svelte";
   import ImageView from "../../../components/ImageView.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import Label from "$lib/components/ui/label/label.svelte";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import * as Select from "$lib/components/ui/select";
+  import { X } from "lucide-svelte";
+  import Badge from "$lib/components/ui/badge/badge.svelte";
+  import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
+  import * as RadioGroup from "$lib/components/ui/radio-group";
+  import { STATUS, WEIGHT_UNIT } from "../../../helper/constants";
+  import { getByValue, toastMessage } from "../../../helper/utils";
 
-  let edit = true;
+  let edit = false;
   let loading = true;
   let product = {
     title: "",
@@ -41,7 +52,7 @@
     hasSKU: false,
     sku: "",
     barcode: "",
-    status: "draft",
+    status: STATUS.DRAFT,
     isDigitalProduct: false,
     shippingWeight: {
       value: 0,
@@ -154,6 +165,9 @@
       payload: product,
     });
     if (response.status === 200) {
+      toastMessage(
+        `Product ${$page.params.id === "create" ? "created" : "updated"} successfully`
+      );
       goto(`/product/${response.data.product.id}`, {
         replaceState: true,
       });
@@ -271,7 +285,7 @@
 
   // const createvariantConfigs = () => {
   //   return {
-  //     status: "draft",
+  //     status: STATUS.DRAFT,
   //     variantOptions: [],
   //     variants: []
   //   };
@@ -281,7 +295,7 @@
     product.variantConfigs = [
       ...product.variantConfigs,
       {
-        status: "draft",
+        status: STATUS.DRAFT,
         variantOptions: [],
         variants: [],
       },
@@ -317,6 +331,7 @@
       initProduct($page.params._id);
     } else {
       loading = false;
+      edit = true;
     }
   }
 </script>
@@ -326,471 +341,442 @@
     <h1 class="text-2xl font-semibold">Add Product</h1>
   </div>
 
-  <Loading {loading}>
-    <div class="grid grid-flow-row lg:grid-cols-3 gap-4 mb-3">
-      <div
-        class="col-span-2 block p-6 bg-white border border-gray-200 rounded-lg shadow"
-      >
-        <div class="mb-5">
-          <label
-            for="title"
-            class="block mb-2 text-sm font-medium text-gray-900">Title</label
-          >
-          <input
-            type="text"
-            id="title"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="Product Title"
-            bind:value={product.title}
-          />
-        </div>
-        <div class="mb-5">
-          <label for="slug" class="block mb-2 text-sm font-medium text-gray-900"
-            >Slug</label
-          >
-          <div class="flex gap-2">
-            <input
+  <div class="grid lg:grid-cols-3 gap-4 mb-3">
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <div class="mb-5">
+            <Label for="title">Title</Label>
+            <Input
+              disabled={!edit}
               type="text"
-              id="slug"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              placeholder="Product slug"
-              bind:value={product.slug}
+              id="title"
+              placeholder="Product Title"
+              bind:value={product.title}
             />
-
-            <button
-              class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-              on:click={handleSlug}
-            >
-              Generate
-            </button>
           </div>
-        </div>
-        <div class="mb-5">
-          <label
-            for="description"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Description</label
-          >
-          <Editor
-            bind:content={product.description}
-            placeholder="Product Description"
-          />
-          <!-- <textarea
+          <div class="mb-5">
+            <Label for="slug">Slug</Label>
+            <div class="flex gap-2">
+              <Input
+                disabled={!edit}
+                type="text"
+                id="slug"
+                placeholder="Product slug"
+                bind:value={product.slug}
+              />
+
+              <Button disabled={!edit} on:click={handleSlug}>Generate</Button>
+            </div>
+          </div>
+          <div class="mb-5">
+            <Label for="description">Description</Label>
+            <Editor
+              disabled={!edit}
+              bind:content={product.description}
+              placeholder="Product Description"
+            />
+            <!-- <textarea
             id="description"
             rows="5"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            
             placeholder="Product Description"
             bind:value={product.description}
           /> -->
-        </div>
+          </div>
 
-        <div class="mb-5">
-          <label
-            for="description"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Specificationn</label
-          >
-          <Editor
-            bind:content={product.specification}
-            placeholder="Specification"
-          />
-          <!-- <textarea
+          <div class="mb-5">
+            <Label for="description">Specificationn</Label>
+            <Editor
+              disabled={!edit}
+              bind:content={product.specification}
+              placeholder="Specification"
+            />
+            <!-- <textarea
             rows="5"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            
             placeholder="Specification"
             bind:value={product.specification}
           /> -->
-        </div>
-      </div>
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
 
-      <div
-        class="col-span-1 block shadow p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold">Product Status</h3>
-        <div>
-          <label
-            for="countries"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Select an option</label
-          >
-          <select
-            id="status"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            value={product.status}
-            on:change={(e) => (product.status = e.target.value)}
-          >
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archive">Archive</option>
-          </select>
-        </div>
-      </div>
+    <div class="lg:col-span-1 order-first lg:order-none">
+      <Card.Root>
+        <Card.Content class="p-4">
+          <Spinner {loading}>
+            <h3 class="text-normal font-semibold">Product Status</h3>
+            <div>
+              <Label for="status">Select an option</Label>
 
-      <div
-        class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold mb-2">Media</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {#each product.assets as asset}
-            <ImageView
-              disabled={!edit}
-              id={asset}
-              on:delete={handleRemoveImage}
-            />
-          {/each}
-
-          <ImageUpload
-            disabled={!edit}
-            on:success={(e) => {
-              product.assets = [...product.assets, e.detail._id];
-            }}
-          />
-        </div>
-      </div>
-
-      <div
-        class="col-span-1 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold mb-5">Organization</h3>
-
-        <div class="mb-5">
-          <label
-            for="title"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Product category</label
-          >
-          {#if product.category}
-            <div class="relative">
-              <input
-                type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                placeholder="Product category"
-                value={product.category.name}
-                disabled
-              />
-              <button
-                class="absolute right-0 top-0 bottom-0 mr-2"
-                on:click={() => {
-                  handleRemoveCategory();
+              <Select.Root
+                disabled={!edit}
+                id="status"
+                selected={{
+                  value: product.status,
+                  label: getByValue(STATUS, product.status),
+                }}
+                onSelectedChange={(v) => {
+                  v && (product.status = v.value);
                 }}
               >
-                <CloseIcon class="w-4 h-4" />
-              </button>
+                <Select.Trigger>
+                  <Select.Value class="capitalize" placeholder="Status" />
+                </Select.Trigger>
+                <Select.Content>
+                  {#each Object.entries(STATUS) as [key, value]}
+                    <Select.Item {value} label={key} />
+                  {/each}
+                </Select.Content>
+              </Select.Root>
             </div>
-          {:else}
-            <Autocomplete
-              placeholder="Search Category"
-              bind:search={search_category}
-              items={categories}
-              on:selected={(e) => {
-                handleAddCategory(e.detail.item);
-              }}
-            >
-              <svelte:fragment slot="item" let:item>{item.name}</svelte:fragment
-              >
-            </Autocomplete>
-          {/if}
-        </div>
-
-        <div class="mb-5">
-          <label
-            for="title"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Collections</label
-          >
-          <Autocomplete
-            placeholder="Search Collections"
-            bind:search={search_collection}
-            items={collections}
-            on:selected={(e) => {
-              handleAddCollection(e.detail.item);
-            }}
-          >
-            <svelte:fragment slot="item" let:item>{item.name}</svelte:fragment>
-          </Autocomplete>
-
-          {#if product.collections.length > 0}
-            <div class="flex">
-              {#each product.collections as collection}
-                <div
-                  class="flex items-center bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full"
-                >
-                  <span>{collection.name} </span>
-                  <button
-                    on:click={() => {
-                      handleRemoveCollection(collection);
-                    }}><CloseIcon class="w-3 h-3" /></button
-                  >
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </div>
-
-        <div class="mb-5">
-          <label
-            for="title"
-            class="block mb-2 text-sm font-medium text-gray-900">Tags</label
-          >
-          <Autocomplete
-            placeholder="Search Tags"
-            bind:search={search_tag}
-            items={tags}
-            on:selected={(e) => {
-              handleAddTag(e.detail.item);
-            }}
-          >
-            <svelte:fragment slot="item" let:item>{item.name}</svelte:fragment>
-          </Autocomplete>
-
-          {#if product.tags.length > 0}
-            <div class="flex">
-              {#each product.tags as tag}
-                <div
-                  class="flex items-center bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full"
-                >
-                  <span>{tag.name} </span>
-                  <button
-                    on:click={() => {
-                      handleRemoveTag(tag);
-                    }}><CloseIcon class="w-3 h-3" /></button
-                  >
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </div>
-      </div>
-
-      <div
-        class="col-span-2 block shadow p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold mb-5">Pricing</h3>
-
-        <div class="mb-5">
-          <label
-            for="price"
-            class="block mb-2 text-sm font-medium text-gray-900"
-            >Compare at Price</label
-          >
-          <input
-            type="number"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-            placeholder="0.00"
-            min="0"
-            step=".01"
-            bind:value={product.compareAtPrice}
-          />
-        </div>
-
-        <div class="mb-5">
-          <label
-            for="price"
-            class="block mb-2 text-sm font-medium text-gray-900">Price</label
-          >
-          <input
-            type="number"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-            placeholder="0.00"
-            min="0"
-            step=".01"
-            bind:value={product.price}
-          />
-        </div>
-      </div>
-
-      <div
-        class="col-span-2 p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold mb-5">Inventory</h3>
-
-        <div class="flex flex-col divide-y gap-2">
-          <div class="py-2">
-            <div class="flex items-center" class:mb-2={product.trackQuantity}>
-              <input
-                type="checkbox"
-                checked={product.trackQuantity}
-                on:change={() => {
-                  product.trackQuantity = !product.trackQuantity;
-                }}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label
-                for="default-checkbox"
-                class="ms-2 text-sm font-medium text-gray-900"
-                >Track Quantity</label
-              >
-            </div>
-            {#if product.trackQuantity}
-              <div>
-                <label
-                  for="trackQuantity"
-                  class="block mb-2 text-sm font-medium text-gray-900"
-                  >Quantity</label
-                >
-                <input
-                  type="number"
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-                  placeholder="0"
-                  min="0"
-                  step="1"
-                  bind:value={product.inventoryQuantity}
-                />
-              </div>
-            {/if}
-          </div>
-          <div class="flex items-center py-2">
-            <input
-              type="checkbox"
-              checked={product.neverOutOfStock}
-              on:change={() => {
-                product.neverOutOfStock = !product.neverOutOfStock;
-              }}
-              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label
-              for="default-checkbox"
-              class="ms-2 text-sm font-medium text-gray-900"
-              >Continue selling when out of stock</label
-            >
-          </div>
-          <div class="py-2">
-            <div class="flex items-center" class:mb-2={product.hasSKU}>
-              <input
-                type="checkbox"
-                checked={product.hasSKU}
-                on:change={() => {
-                  product.hasSKU = !product.hasSKU;
-                }}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label
-                for="default-checkbox"
-                class="ms-2 text-sm font-medium text-gray-900"
-                >This product has a SKU or Barcode</label
-              >
-            </div>
-
-            {#if product.hasSKU}
-              <div class="flex gap-2">
-                <div>
-                  <label
-                    for="trackQuantity"
-                    class="block mb-2 text-sm font-medium text-gray-900"
-                    >SKU</label
-                  >
-                  <input
-                    type="text"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-                    placeholder="SKU"
-                    bind:value={product.sku}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    for="trackQuantity"
-                    class="block mb-2 text-sm font-medium text-gray-900"
-                    >Barcode (ISBN,UPC,GTIN etc)</label
-                  >
-                  <input
-                    type="text"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-                    placeholder="Barcode"
-                    bind:value={product.barcode}
-                  />
-                </div>
-              </div>
-            {/if}
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="col-span-2 block shadow p-6 bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-      >
-        <h3 class="text-normal font-semibold mb-4">Shipping</h3>
-
-        <div
-          class="flex flex-col gap-2 transition-all ease-in-out duration-200"
-        >
-          <div class="border border-gray-200 rounded-lg flex flex-col divide-y">
-            <div
-              class="p-4 flex items-center bg-gray-100"
-              class:bg-gray-100={!product.isDigitalProduct}
-            >
-              <input
-                id="default-radio-1"
-                type="radio"
-                bind:group={product.isDigitalProduct}
-                value={false}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600"
-              />
-              <label
-                for="default-radio-1"
-                class="ms-2 text-sm font-medium text-gray-900"
-                >Physical product</label
-              >
-            </div>
-            {#if !product.isDigitalProduct}
-              <div class="p-4 flex items-end gap-2">
-                <div class="">
-                  <label
-                    for="title"
-                    class="block mb-2 text-sm font-medium text-gray-900"
-                    >Shipping weight</label
-                  >
-                  <input
-                    type="number"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    bind:value={product.shippingWeight.value}
-                  />
-                </div>
-                <select
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-                  value={product.shippingWeight.unit}
-                  on:change={(e) =>
-                    (product.shippingWeight.unit = e.target.value)}
-                >
-                  <option value="kg">kg</option>
-                  <option value="g">g</option>
-                  <option value="lb">lb</option>
-                  <option value="oz">oz</option>
-                </select>
-              </div>
-            {/if}
-          </div>
-          <div class="border border-gray-200 rounded-lg">
-            <div class="p-4 flex items-center">
-              <input
-                id="default-radio-2"
-                type="radio"
-                value={true}
-                bind:group={product.isDigitalProduct}
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-              />
-              <label
-                for="default-radio-2"
-                class="ms-2 text-sm font-medium text-gray-900"
-                >Digital product or service</label
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="col-span-2 shadow block p-6 bg-white border border-gray-200 rounded-lg"
-      >
-        <h3 class="text-normal font-semibold mb-4">Variants</h3>
-        <VariantConfigs bind:variantConfigs={product.variantConfigs} />
-      </div>
+          </Spinner>
+        </Card.Content>
+      </Card.Root>
     </div>
 
-    <!-- <div
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h3 class="text-normal font-semibold mb-2">Media</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {#each product.assets as asset}
+              <ImageView
+                disabled={!edit}
+                id={asset}
+                on:delete={handleRemoveImage}
+              />
+            {/each}
+
+            <ImageUpload
+              disabled={!edit}
+              on:success={(e) => {
+                product.assets = [...product.assets, e.detail._id];
+              }}
+            />
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+
+    <div class="lg:col-span-1">
+      <Card.Root>
+        <Card.Content class="p-4">
+          <Spinner {loading}>
+            <h3 class="text-normal font-semibold mb-5">Organization</h3>
+
+            <div class="mb-5">
+              <Label for="title">Product category</Label>
+              {#if product.category}
+                <div class="relative">
+                  <Input
+                    type="text"
+                    placeholder="Product category"
+                    value={product.category.name}
+                    disabled
+                  />
+                  <Button
+                    disabled={!edit}
+                    class="absolute right-0 top-0 bottom-0 mr-2"
+                    variant="ghost"
+                    on:click={() => {
+                      handleRemoveCategory();
+                    }}
+                  >
+                    <X />
+                  </Button>
+                </div>
+              {:else}
+                <Autocomplete
+                  disabled={!edit}
+                  placeholder="Search Category"
+                  bind:search={search_category}
+                  items={categories}
+                  on:selected={(e) => {
+                    handleAddCategory(e.detail.item);
+                  }}
+                >
+                  <svelte:fragment slot="item" let:item
+                    >{item.name}</svelte:fragment
+                  >
+                </Autocomplete>
+              {/if}
+            </div>
+
+            <div class="mb-5">
+              <Label for="title">Collections</Label>
+              <Autocomplete
+                placeholder="Search Collections"
+                bind:search={search_collection}
+                items={collections}
+                on:selected={(e) => {
+                  handleAddCollection(e.detail.item);
+                }}
+              >
+                <svelte:fragment slot="item" let:item
+                  >{item.name}</svelte:fragment
+                >
+              </Autocomplete>
+
+              {#if product.collections.length > 0}
+                <div class="flex">
+                  {#each product.collections as collection}
+                    <Badge class="flex items-center justify-centerr">
+                      <div>{collection.name}</div>
+                      <button
+                        disabled={!edit}
+                        on:click={() => {
+                          handleRemoveCollection(collection);
+                        }}><X class="w-3 h-3" /></button
+                      >
+                    </Badge>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+
+            <div class="mb-5">
+              <Label for="title">Tags</Label>
+              <Autocomplete
+                disabled={!edit}
+                placeholder="Search Tags"
+                bind:search={search_tag}
+                items={tags}
+                on:selected={(e) => {
+                  handleAddTag(e.detail.item);
+                }}
+              >
+                <svelte:fragment slot="item" let:item
+                  >{item.name}</svelte:fragment
+                >
+              </Autocomplete>
+
+              {#if product.tags.length > 0}
+                <div class="flex">
+                  {#each product.tags as tag}
+                    <Badge class="flex items-center justify-centerr">
+                      <div>{tag.name}</div>
+                      <button
+                        disabled={!edit}
+                        on:click={() => {
+                          handleRemoveTag(tag);
+                        }}><X class="w-3 h-3" /></button
+                      >
+                    </Badge>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </Spinner>
+        </Card.Content>
+      </Card.Root>
+    </div>
+
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h3 class="text-normal font-semibold mb-5">Pricing</h3>
+
+          <div class="mb-5">
+            <Label for="price">Compare at Price</Label>
+            <Input
+              disabled={!edit}
+              type="number"
+              placeholder="0.00"
+              min="0"
+              step=".01"
+              bind:value={product.compareAtPrice}
+            />
+          </div>
+
+          <div class="mb-5">
+            <Label for="price">Price</Label>
+            <Input
+              disabled={!edit}
+              type="number"
+              placeholder="0.00"
+              min="0"
+              step=".01"
+              bind:value={product.price}
+            />
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h3 class="text-normal font-semibold mb-5">Inventory</h3>
+
+          <div class="flex flex-col divide-y gap-2">
+            <div class="py-2">
+              <div
+                class="flex gap-2 items-center"
+                class:mb-2={product.trackQuantity}
+              >
+                <Checkbox
+                  bind:checked={product.trackQuantity}
+                  disabled={!edit}
+                />
+                <Label for="default-checkbox">Track Quantity</Label>
+              </div>
+              {#if product.trackQuantity}
+                <div>
+                  <Label for="trackQuantity">Quantity</Label>
+                  <Input
+                    disabled={!edit}
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    step="1"
+                    bind:value={product.inventoryQuantity}
+                  />
+                </div>
+              {/if}
+            </div>
+            <div class="flex gap-2 items-center py-2">
+              <Checkbox
+                bind:checked={product.neverOutOfStock}
+                disabled={!edit}
+              />
+              <Label for="default-checkbox"
+                >Continue selling when out of stock</Label
+              >
+            </div>
+            <div class="py-2">
+              <div class="flex gap-2 items-center" class:mb-2={product.hasSKU}>
+                <Checkbox bind:checked={product.hasSKU} disabled={!edit} />
+                <Label for="default-checkbox"
+                  >This product has a SKU or Barcode</Label
+                >
+              </div>
+
+              {#if product.hasSKU}
+                <div class="flex gap-2">
+                  <div>
+                    <Label for="trackQuantity">SKU</Label>
+                    <Input
+                      disabled={!edit}
+                      type="text"
+                      placeholder="SKU"
+                      bind:value={product.sku}
+                    />
+                  </div>
+
+                  <div>
+                    <Label for="trackQuantity"
+                      >Barcode (ISBN,UPC,GTIN etc)</Label
+                    >
+                    <Input
+                      disabled={!edit}
+                      type="text"
+                      placeholder="Barcode"
+                      bind:value={product.barcode}
+                    />
+                  </div>
+                </div>
+              {/if}
+            </div>
+          </div>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h3 class="text-normal font-semibold mb-4">Shipping</h3>
+
+          <RadioGroup.Root
+            value={product.isDigitalProduct ? "true" : "false"}
+            onValueChange={(e) => {
+              product.isDigitalProduct = e === "true" ? true : false;
+            }}
+          >
+            <div
+              class="flex flex-col gap-2 transition-all ease-in-out duration-200"
+            >
+              <div class="border rounded-lg flex flex-col divide-y">
+                <div
+                  class="p-4 flex items-center gap-2"
+                  class:bg-base={!product.isDigitalProduct}
+                >
+                  <RadioGroup.Item
+                    id="default-radio-1"
+                    value="false"
+                    disabled={!edit}
+                  />
+                  <Label for="default-radio-1">Physical product</Label>
+                </div>
+                {#if !product.isDigitalProduct}
+                  <div class="p-4 flex items-end gap-2">
+                    <div class="">
+                      <Label for="title">Shipping weight</Label>
+                      <Input
+                        disabled={!edit}
+                        type="number"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                        bind:value={product.shippingWeight.value}
+                      />
+                    </div>
+
+                    <Select.Root
+                      disabled={!edit}
+                      selected={{
+                        value: product.shippingWeight.unit,
+                        label: getByValue(
+                          WEIGHT_UNIT,
+                          product.shippingWeight.unit
+                        ),
+                      }}
+                      onSelectedChange={(e) =>
+                        (product.shippingWeight.unit = e.value)}
+                    >
+                      <Select.Trigger class="w-24">
+                        <Select.Value placeholder="Unit" />
+                      </Select.Trigger>
+                      <Select.Content>
+                        {#each Object.entries(WEIGHT_UNIT) as [key, value]}
+                          <Select.Item {value} label={key} />
+                        {/each}
+                      </Select.Content>
+                    </Select.Root>
+                  </div>
+                {/if}
+              </div>
+              <div class="border rounded-lg">
+                <div class="p-4 flex gap-2 items-center">
+                  <RadioGroup.Item
+                    id="default-radio-2"
+                    value="true"
+                    disabled={!edit}
+                  />
+                  <Label for="default-radio-2">Digital product or service</Label
+                  >
+                </div>
+              </div>
+            </div>
+          </RadioGroup.Root>
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+
+    <Card.Root class="lg:col-span-2">
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <h3 class="text-normal font-semibold mb-4">Variants</h3>
+          <VariantConfigs disabled={!edit} bind:variantConfigs={product.variantConfigs} />
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
+  </div>
+
+  <!-- <div
       class="col-span-2 block py-6 bg-white border border-gray-200 rounded-lg"
     >
       <h3 class="text-normal font-semibold mb-4 px-6">Search engine listing</h3>
@@ -800,12 +786,14 @@
       </p>
     </div> -->
 
-    <button
-      type="button"
-      class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-      on:click={handleSave}
+  {#if edit}
+    <Button type="Button" disabled={loading} on:click={handleSave}>Save</Button>
+  {:else}
+    <Button
+      type="Button"
+      on:click={() => {
+        edit = true;
+      }}>Edit</Button
     >
-      Save</button
-    >
-  </Loading>
+  {/if}
 </div>

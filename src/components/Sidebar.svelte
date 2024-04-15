@@ -3,6 +3,10 @@
   import MenuIcon from "./svg/MenuIcon.svelte";
   import OrdersIcon from "./svg/OrdersIcon.svelte";
   import SellIcon from "./svg/SellIcon.svelte";
+  import * as Sheet from "$lib/components/ui/sheet/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Input } from "$lib/components/ui/input/index.js";
+  import { Label } from "$lib/components/ui/label/index.js";
 
   export let sidebarOpen: Boolean;
 
@@ -34,134 +38,83 @@
     },
   ];
 
-  const getIcon = (menuName: string) => {
-    switch (menuName) {
-      case "Home":
-        return DashboardIcon;
-      case "Products":
-        return SellIcon;
-      default:
-        return MenuIcon;
-    }
-  };
+
 </script>
 
 <div
   class="py-4 h-100 rounded-none border-none transition-all duration-200 ease-in-out overflow-hidden"
-  class:w-16={!sidebarOpen}
-  class:w-48={sidebarOpen}
 >
   <nav class="">
     <ul>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-start items-center gap-2" href="/">
-          <DashboardIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Dashboard</span></a
+          <span>Dashboard</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
-        <a class="flex justify-start items-center gap-2" href="/template">
-          <DashboardIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Templates</span></a
+      <li class="px-4 py-2 cursor-pointer">
+        <a class="flex justify-start items-center gap-2" href="/page">
+          <span>Pages</span></a
         >
       </li>
 
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-start items-center gap-2" href="/announcement">
-          <DashboardIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Announcement</span></a
+          <span>Announcement</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-start items-center gap-2" href="/tag">
-          <DashboardIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Tag</span></a
+          <span>Tag</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-start items-center gap-2" href="/category">
-          <DashboardIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Category</span></a
+          <span>Category</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/order">
-          <OrdersIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Orders</span></a
+          <span>Orders</span></a
         >
       </li>
 
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/product">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Products</span></a
+          <span>Products</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/collection">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Collections</span></a
+          <span>Collections</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/user">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Users</span></a
+          <span>Users</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/role">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Roles</span></a
+          <span>Roles</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/image">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Image</span></a
+          <span>Image</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/coupon">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Coupon</span></a
+          <span>Coupon</span></a
         >
       </li>
-      <li
-        class="px-4 py-2 hover:text-purple-500 hover:bg-gray-100 cursor-pointer"
-      >
+      <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-star items-center gap-2" href="/facet">
-          <SellIcon class="text-gray-500 w-6 h-6" />
-          <span class:hidden={!sidebarOpen}>Facet</span></a
+          <span>Facet</span></a
         >
       </li>
     </ul>
   </nav>
 </div>
 
-<style>
-</style>
+

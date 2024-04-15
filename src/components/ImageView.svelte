@@ -6,6 +6,8 @@
   import { httpClient } from "../helper/httpClient";
   import { getImage } from "../helper/endpoints";
   import { createEventDispatcher } from "svelte";
+  import Trash2 from "lucide-svelte/icons/trash";
+  import Button from "$lib/components/ui/button/button.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -38,7 +40,7 @@
   }
 </script>
 
-<div class="aspect-square relative">
+<div class="relative">
   {#if loading}
     <Spinner />
   {:else if error}
@@ -56,11 +58,12 @@
 
     <div class="absolute top-0 z-20 right-0 m-2">
       <button
+        variant="ghost"
         {disabled}
         class="text-red-500"
         on:click={() => dispatch("delete", { id })}
       >
-        <DeleteIcon />
+        <Trash2 class="w-5 h-5" />
       </button>
     </div>
 

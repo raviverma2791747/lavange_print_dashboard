@@ -1,22 +1,31 @@
 <script>
   //@ts-nocheck
+  import Input from "$lib/components/ui/input/input.svelte";
+
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
+  let class_ = "";
 
+  export { class_ as class };
   export let search = "";
   export let items = [];
   export let placeholder = "";
+  export let disabled = false;
 </script>
 
 <div class="relative mb-2">
-  <input
+  <Input
+  disabled={disabled}
+    class={class_}
     type="text"
-    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-    placeholder={placeholder}
+    {placeholder}
     bind:value={search}
+    on:change={(e) => {
+      dispatch("change", e);
+    }}
     on:input={(e) => {
-      dispatch("input",e);
+      dispatch("input", e);
     }}
     on:blur={() => {
       setTimeout(() => {
@@ -27,7 +36,7 @@
 
   {#if search !== ""}
     <div
-      class="absolute top-full z-20 bg-white rounded-lg w-full shadow mt-2 flex flex-col divide-y"
+      class="absolute top-full z-20 bg-background border rounded-lg w-full shadow mt-2 flex flex-col divide-y"
     >
       {#each items as item}
         <div

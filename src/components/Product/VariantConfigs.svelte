@@ -1,10 +1,12 @@
 <script>
   //@ts-nocheck
+  import Button from "$lib/components/ui/button/button.svelte";
   import CreateVariantConfigForm from "./CreateVariantConfigForm.svelte";
   import EditVariantConfigForm from "./EditVariantConfigForm.svelte";
   import VariantConfig from "./VariantConfig.svelte";
 
   export let variantConfigs;
+  export let disabled=false;
   let create = false;
   let lock_create = false;
   let edit_variant_config_index = -1;
@@ -29,16 +31,13 @@
 
   const handleCancelEditVariantConfig = (e) => {
     edit_variant_config_index = -1;
-  }
+  };
 
   const handleSaveEditVariantConfig = (e) => {
     edit_variant_config_index = -1;
+  };
 
-  }
-
-  const validate = (data) => {
-    
-  }
+  const validate = (data) => {};
 </script>
 
 <div
@@ -55,7 +54,7 @@
     {:else}
       <VariantConfig
         {variantConfig}
-        disabled={create || edit_variant_config_index !== -1}
+        disabled={create || edit_variant_config_index !== -1 || disabled}
         {index}
         on:edit={handleEditVariantConfig}
       />
@@ -69,10 +68,10 @@
   {/if}
 </div>
 
-<button
-  class="text-purple-500 inline-flex cursor-pointer disabled:text-purple-300"
+<Button
+  variant="ghost"
   on:click={handleCreateVariantConfig}
-  disabled={create || edit_variant_config_index !== -1 || lock_create}
+  disabled={create || edit_variant_config_index !== -1 || lock_create || disabled}
 >
   Add Variant Config
-</button>
+</Button>

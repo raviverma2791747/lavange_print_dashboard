@@ -3,17 +3,19 @@
   import { onMount } from "svelte";
   import Loading from "../../components/Spinner.svelte";
   import { goto } from "$app/navigation";
-  import DataTable from "../../components/DataTable/DataTable.svelte";
+  import DataTable from "../../components/DataTable.svelte";
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchImage } from "../../helper/endpoints";
   import { token_store } from "../../helper/store";
+  import * as Card from "$lib/components/ui/card";
+  import Button from "$lib/components/ui/button/button.svelte";
 
   let images = [];
   let loading = true;
 
   const handleRowClick = (row) => {
-    goto(`/image/${row.detail.id}`);
+    goto(`/image/${row.detail._id}`);
   };
 
   const initImages = async () => {
@@ -34,29 +36,42 @@
 <div class="py-4 px-8 max-w-7xl mx-auto">
   <div class="mb-2 flex gap-4">
     <h1 class="text-2xl font-bold">Images</h1>
-    <button
-      type="button"
-      class="ms-auto text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+
+    <Button
+      class="ms-auto"
       on:click={() => {
         goto("/image/view");
       }}
     >
-      View All Images</button
-    >
-    <button
-      type="button"
-      class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+      View All Images
+    </Button>
+    <Button
       on:click={() => {
         goto("/image/create");
       }}
     >
-      Add Image</button
+      Add Image</Button
     >
   </div>
-  <div class="bg-white w-full border border-gray-200 rounded-lg p-6 shadow">
-    <Loading {loading}>
-      {#if images.length}
-        <DataTable
+  <Card.Root>
+    <Card.Content class="p-4">
+      <Loading {loading}>
+        {#if images.length}
+          <DataTable
+            headers={[
+              { accessor: "_id", header: "Name" },
+              { accessor: "title", header: "Title" },
+              {
+                accessor: "updatedAt",
+                header: "Modified",
+                cell: ({ value }) => format(value, "yyyy-MM-dd HH:mm:ss"),
+              },
+            ]}
+            data={images}
+            on:rowClick={handleRowClick}
+          />
+
+          <!-- <DataTable
           headers={[
             { key: "_id", value: "Name" },
             {
@@ -78,13 +93,13 @@
             />
           </div>
 
-          <!-- <svelte:fragment slot="cell-header" let:header>
+           <svelte:fragment slot="cell-header" let:header>
                 {#if header.key === "title"}
                   ok
                 {:else}
                   {header.value}
                 {/if}
-              </svelte:fragment> -->
+              </svelte:fragment> 
 
           <svelte:fragment slot="cell" let:row let:cell>
             {#if cell.key === "status"}
@@ -96,12 +111,12 @@
               {cell.display ? cell.display(cell.value, row) : cell.value}
             {/if}
           </svelte:fragment>
-        </DataTable>
-      {:else}
-        <div class="flex justify-center">
-          <div>
-            <div>No images to show!</div>
-            <!-- <button
+        </DataTable> -->
+        {:else}
+          <div class="flex justify-center">
+            <div>
+              <div>No images to show!</div>
+              <!-- <button
                   type="button"
                   class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
                   on:click={() => {
@@ -110,10 +125,11 @@
                 >
                   Add Product</button
                 > -->
-            <div></div>
+              <div></div>
+            </div>
           </div>
-        </div>
-      {/if}
-    </Loading>
-  </div>
+        {/if}
+      </Loading>
+    </Card.Content>
+  </Card.Root>
 </div>

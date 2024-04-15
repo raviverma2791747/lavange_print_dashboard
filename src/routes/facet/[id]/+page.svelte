@@ -6,11 +6,17 @@
   import { getFacet, updateFacet } from "../../../helper/endpoints";
   import { httpClient } from "../../../helper/httpClient";
   import { token_store } from "../../../helper/store";
+  import Button from "$lib/components/ui/Button/Button.svelte";
+  import * as Card from "$lib/components/ui/card";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import * as Select from "$lib/components/ui/select";
+  import { FACET_TYPE } from "../../../helper/constants";
+  import { getByValue, toastMessage } from "../../../helper/utils";
 
   let facet = {
     name: "",
     displayName: "",
-    type: "other",
+    type: FACET_TYPE.OTHER,
     options: [],
   };
   let edit;
@@ -38,6 +44,9 @@
       goto(`/facet/${response.data.facet.id}`, {
         replaceState: true,
       });
+      toastMessage(
+        `Facet ${$page.params.id === "create" ? "created" : "updated"} successfully`
+      );
       edit = false;
     }
 
@@ -68,129 +77,114 @@
 <div class="py-4 px-8 max-w-7xl mx-auto">
   <div class="mb-2 flex justify-between">
     <h1 class="text-2xl font-bold">Facet</h1>
-    <!-- <button
-            type="button"
-            class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-            on:click={() => {
-              goto("/product/create");
-            }}
-          >
-            Add Product</button
-          > -->
   </div>
   <div class="flex flex-col gap-4 mb-4">
-    <div
-      class="col-span-2 block p-6 shadow bg-white border border-gray-200 rounded-lg hover:bg-gray-10"
-    >
-      {#if loading}
-        <Spinner />
-      {:else}
-        <div class="mb-2">
-          <label
-            for="facets"
-            class="block mb-2 text-sm font-medium text-gray-900">Facets</label
-          >
+    <Card.Root>
+      <Card.Content class="p-4">
+        <Spinner {loading}>
+          <div class="mb-2">
+            <label for="facets" class="block mb-2 text-sm font-medium"
+              >Facets</label
+            >
 
-          <div class="flex flex-col gap-2 mb-2">
-            <div class="border border-gray-200 rounded-lg p-4">
-              <div class="mb-2">
-                <div class="flex gap-2">
-                  <input
-                    type="text"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    placeholder="Display Name"
-                    bind:value={facet.displayName}
-                    disabled={!edit}
-                  />
+            <div class="flex flex-col gap-2 mb-2">
+              <div class="border rounded-lg p-4">
+                <div class="mb-2">
+                  <div class="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Display Name"
+                      bind:value={facet.displayName}
+                      disabled={!edit}
+                    />
 
-                  <input
-                    type="text"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    placeholder="Name"
-                    bind:value={facet.name}
-                    disabled={!edit}
-                  />
+                    <Input
+                      type="text"
+                      placeholder="Name"
+                      bind:value={facet.name}
+                      disabled={!edit}
+                    />
 
-                  <select
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    value={facet.type}
-                    on:change={(e) => (facet.type = e.target.value)}
-                  >
-                    <option value="color">Color</option>
-                    <option value="size">Size</option>
-                    <option value="material">Material</option>
-                    <option value="other">Other</option>
-                  </select>
+                    <Select.Root
+                      disabled={!edit}
+                      id="type"
+                      selected={{
+                        value: facet.type,
+                        label: getByValue(FACET_TYPE, facet.type),
+                      }}
+                      onSelectedChange={(v) => {
+                        v && (facet.type = v.value);
+                      }}
+                    >
+                      <Select.Trigger>
+                        <Select.Value class="capitalize" placeholder="Status" />
+                      </Select.Trigger>
+                      <Select.Content>
+                        {#each Object.entries(FACET_TYPE) as [key, value]}
+                          <Select.Item {value} label={key} />
+                        {/each}
+                      </Select.Content>
+                    </Select.Root>
+                  </div>
                 </div>
-              </div>
 
-              <div class="mb-2">
-                <div class="flex flex-col gap-2 mb-2">
-                  {#each facet.options as option}
-                    <div class="flex gap-2">
-                      <input
-                        type="text"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        placeholder="Option Display Name"
-                        bind:value={option.displayName}
-                        disabled={!edit}
-                      />
-
-                      {#if facet.type === "color"}
-                        <input
-                          type="color"
-                          class="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer w-10 rounded-lg disabled:opacity-50 disabled:pointer-events-none"
-                          bind:value={option.value}
-                        />
-                      {:else}
-                        <input
+                <div class="mb-2">
+                  <div class="flex flex-col gap-2 mb-2">
+                    {#each facet.options as option}
+                      <div class="flex gap-2">
+                        <Input
                           type="text"
-                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                          placeholder="Option Value"
-                          bind:value={option.value}
+                          placeholder="Option Display Name"
+                          bind:value={option.displayName}
                           disabled={!edit}
                         />
-                      {/if}
 
-                      <button
-                        class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  {/each}
+                        {#if facet.type === "color"}
+                          <Input
+                            disabled={!edit}
+                            type="color"
+                            bind:value={option.value}
+                          />
+                        {:else}
+                          <Input
+                            type="text"
+                            placeholder="Option Value"
+                            bind:value={option.value}
+                            disabled={!edit}
+                          />
+                        {/if}
+
+                        <Button variant="destructive" disabled={!edit}
+                          >Remove</Button
+                        >
+                      </div>
+                    {/each}
+                  </div>
                 </div>
-              </div>
 
-              <button
-                disabled={!edit}
-                class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-                on:click={() => handleAddFacetOption()}
-              >
-                Add Options
-              </button>
+                <Button
+                  disabled={!edit}
+                  on:click={() => handleAddFacetOption()}
+                >
+                  Add Options
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-        <button
-          class="bg-gray-50 border font-semibold border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 disabled:text-gray-400"
-          class:hidden={edit}
-          on:click={() => {
-            edit = true;
-          }}
-        >
-          Edit
-        </button>
 
-        <button
-          type="button"
-          class="text-center inline-flex items-center focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-          on:click={handleSave}
-          class:hidden={!edit}
-        >
-          Save</button
-        >
-      {/if}
-    </div>
+          {#if edit}
+            <Button on:click={handleSave}>Save</Button>
+          {:else}
+            <Button
+              on:click={() => {
+                edit = true;
+              }}
+            >
+              Edit
+            </Button>
+          {/if}
+        </Spinner>
+      </Card.Content>
+    </Card.Root>
   </div>
 </div>

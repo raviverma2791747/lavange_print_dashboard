@@ -1,5 +1,6 @@
 //@ts-nocheck
 import { PUBLIC_API_URI } from "$env/static/public";
+import { toast } from "svelte-sonner";
 
 export const httpClient = async (
   endpoint,
@@ -23,8 +24,8 @@ export const httpClient = async (
     options.body = JSON.stringify(config.payload);
   }
 
-  if(config.formData) {
-    options.body = config.formData
+  if (config.formData) {
+    options.body = config.formData;
   }
 
   if (config.queryParams) {
@@ -33,7 +34,19 @@ export const httpClient = async (
 
   options.headers = headers;
 
-  const response = await fetch(url, options);
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    if (data.status && data.status !== 200) {
+      toast.error(
+        data.messages && data.messages.length
+          ? data.messages.join(" ")
+          : "Something Went Wrong!"
+      );
+    }
+    return data;
+  } catch {
+    toast.error("Failed to connect server!");
+  }
 };
