@@ -592,7 +592,7 @@
                 }}
               >
                 <Select.Trigger>
-                  <Select.Value class="capitalize" placeholder="Status" />
+                  <Select.Value class="capitalize" placeholder="Type" />
                 </Select.Trigger>
                 <Select.Content>
                   {#each Object.entries(NUMBER_TYPE) as [key, value]}
@@ -611,8 +611,13 @@
                 type="number"
                 min="1"
                 placeholder="Minium Quantity"
-                bind:value={coupon.quantity.minimum}
+                value={coupon.quantity.minimum}
                 disabled={!edit}
+                on:input={(e) => {
+                  coupon.quantity.minimum = e.target.value
+                    ? Number(e.target.value)
+                    : coupon.quantity.minimum;
+                }}
               />
             </div>
 
@@ -622,8 +627,13 @@
                 id="quantity-max"
                 type="number"
                 placeholder="Minium Quantity"
-                bind:value={coupon.quantity.maximum}
+                value={coupon.quantity.maximum}
                 disabled={!edit}
+                on:input={(e) => {
+                  coupon.quantity.maximum = e.target.value
+                    ? Number(e.target.value)
+                    : coupon.quantity.maximum;
+                }}
               />
             </div>
           </div>
@@ -636,8 +646,13 @@
                 type="number"
                 min="0"
                 placeholder="Minium Amount"
-                bind:value={coupon.amount.minimum}
+                value={coupon.amount.minimum}
                 disabled={!edit}
+                on:input={(e) => {
+                  coupon.amount.minimum = e.target.value
+                    ? Number(e.target.value)
+                    : coupon.amount.minimum;
+                }}
               />
             </div>
 
@@ -648,8 +663,13 @@
                 type="number"
                 min="0"
                 placeholder="Maximum Amount"
-                bind:value={coupon.amount.maximum}
+                value={coupon.amount.maximum}
                 disabled={!edit}
+                on:input={(e) => {
+                  coupon.amount.maximum = e.target.value
+                    ? Number(e.target.value)
+                    : coupon.amount.maximum;
+                }}
               />
             </div>
           </div>

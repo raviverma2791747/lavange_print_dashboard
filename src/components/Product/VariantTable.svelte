@@ -53,8 +53,11 @@
           <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
             <div>{uniqueName(variant)}</div>
 
-            <Dialog.Root >
-              <Dialog.Trigger {disabled} class="border px-2 py-1 rounded-lg h-24 w-24">
+            <Dialog.Root>
+              <Dialog.Trigger
+                {disabled}
+                class="border px-2 py-1 rounded-lg h-24 w-24"
+              >
                 Edit Images <br />
                 {variant.assets.length}
               </Dialog.Trigger>
@@ -70,7 +73,7 @@
           <td class="px-6 py-4">
             <Input
               {disabled}
-              bind:value={variant.compareAtPrice}
+              value={variant.compareAtPrice}
               on:blur={(e) => {
                 dispatch("compareAtPrice", {
                   variant,
@@ -79,16 +82,26 @@
               }}
               type="number"
               placeholder="Compare At Price"
+              on:input={(e) => {
+                variant.compareAtPrice = e.target.value
+                  ? Number(e.target.value)
+                  : variant.compareAtPrice;
+              }}
             />
           </td>
           <td class="px-6 py-4">
             <Input
               {disabled}
-              bind:value={variant.price}
+              value={variant.price}
               on:blur={(e) => {
                 dispatch("price", { variant, price: e.target.value });
               }}
               type="number"
+              on:input={(e) => {
+                variant.price = e.target.value
+                  ? Number(e.target.value)
+                  : variant.price;
+              }}
               placeholder="Price"
             />
           </td>

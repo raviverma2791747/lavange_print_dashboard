@@ -56,7 +56,7 @@
     isDigitalProduct: false,
     shippingWeight: {
       value: 0,
-      unit: "kg",
+      unit: WEIGHT_UNIT.KG,
     },
     variantConfigs: [],
     tags: [],
@@ -171,6 +171,7 @@
       goto(`/product/${response.data.product.id}`, {
         replaceState: true,
       });
+      edit=false;
     }
 
     loading = false;
@@ -327,8 +328,8 @@
   }
 
   $: {
-    if ($page.params._id !== "create") {
-      initProduct($page.params._id);
+    if ($page.params.id !== "create") {
+      initProduct($page.params.id);
     } else {
       loading = false;
       edit = true;
@@ -582,12 +583,17 @@
           <div class="mb-5">
             <Label for="price">Compare at Price</Label>
             <Input
-              disabled={!edit}
               type="number"
+              disabled={!edit}
               placeholder="0.00"
               min="0"
               step=".01"
-              bind:value={product.compareAtPrice}
+              value={product.compareAtPrice}
+              on:input={(e) => {
+                product.compareAtPrice = e.target.value
+                  ? Number(e.target.value)
+                  : product.compareAtPrice;
+              }}
             />
           </div>
 
@@ -599,7 +605,12 @@
               placeholder="0.00"
               min="0"
               step=".01"
-              bind:value={product.price}
+              value={product.price}
+              on:input={(e) => {
+                product.price = e.target.value
+                  ? Number(e.target.value)
+                  : product.price;
+              }}
             />
           </div>
         </Spinner>
@@ -632,7 +643,12 @@
                     placeholder="0"
                     min="0"
                     step="1"
-                    bind:value={product.inventoryQuantity}
+                    value={product.inventoryQuantity}
+                    on:input={(e) => {
+                      product.inventoryQuantity = e.target.value
+                        ? Number(e.target.value)
+                        : product.inventoryQuantity;
+                    }}
                   />
                 </div>
               {/if}
@@ -721,7 +737,12 @@
                         placeholder="0.00"
                         min="0"
                         step="0.01"
-                        bind:value={product.shippingWeight.value}
+                        value={product.shippingWeight.value}
+                        on:input={(e) => {
+                          product.shippingWeight.value = e.target.value
+                            ? Number(e.target.value)
+                            : product.shippingWeight.value;
+                        }}
                       />
                     </div>
 
@@ -770,7 +791,10 @@
       <Card.Content class="p-4">
         <Spinner {loading}>
           <h3 class="text-normal font-semibold mb-4">Variants</h3>
-          <VariantConfigs disabled={!edit} bind:variantConfigs={product.variantConfigs} />
+          <VariantConfigs
+            disabled={!edit}
+            bind:variantConfigs={product.variantConfigs}
+          />
         </Spinner>
       </Card.Content>
     </Card.Root>

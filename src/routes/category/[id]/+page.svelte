@@ -128,7 +128,7 @@
 
   onMount(async () => {
     loading = true;
-    if ($page.params._id !== "create") {
+    if ($page.params.id !== "create") {
       await initCategory($page.params.id);
       await Promise.all(category.facets.map((facet) => getFacetById(facet)));
     } else {

@@ -6,6 +6,7 @@
   import * as Table from "$lib/components/ui/table";
   import { token_store } from "../../../helper/store";
   import {
+    fetchUser,
     getOrder,
     getProduct,
     updateOrder,
@@ -34,6 +35,14 @@
   import * as Select from "$lib/components/ui/select";
   import Input from "$lib/components/ui/input/input.svelte";
   import Badge from "$lib/components/ui/badge/badge.svelte";
+  import Autocomplete from "../../../components/Autocomplete.svelte";
+  import {
+    user_cache,
+    product_cache,
+    category_cache,
+    collection_cache,
+    announcement_cache,
+  } from "../../../helper/cache_store";
 
   let loading = true;
   let edit = false;
@@ -191,6 +200,29 @@
       products.set(product_id, response.data.product);
     }
     loading = false;
+  };
+
+  let suggested_users = [];
+
+  const fetchUsers = async (search) => {
+    if (search) {
+      const response = await httpClient(fetchUser, {
+        params: { search },
+        token: $token_store,
+      });
+
+      if (response.status === 200) {
+        suggested_users = response.data.users ?? [];
+      } else {
+        suggested_users = [];
+      }
+
+      suggested_users.forEach((user) => {
+        if (!$user_cache.has(user._id)) {
+          $user_cache.set(user._id, user);
+        }
+      });
+    }
   };
 
   $: {
@@ -371,7 +403,9 @@
             <div class="flex gap-4">
               <Button on:click={handleUpdateStatus}>Save</Button>
 
-              <Button variant="outline" on:click={handleUpdateStatusCancel}>Cancel</Button>
+              <Button variant="outline" on:click={handleUpdateStatusCancel}
+                >Cancel</Button
+              >
             </div>
           {:else}
             <Button
@@ -441,8 +475,41 @@
                 disabled={!edit}
               />
             </div>
+
+            {#if edit}
+              <div class="mb-5">
+                <Button
+                  variant="destructive"
+                  on:click={() => {
+                    order.user = null;
+                  }}>Remove User</Button
+                >
+              </div>
+            {/if}
           {:else}
-            No user
+            <div class="mb-5">
+              <Label for="title">Users</Label>
+              <Autocomplete
+                placeholder="Search User"
+                on:input={async (e) => {
+                  await fetchUsers(e.detail.target.value);
+                }}
+                items={suggested_users}
+                on:selected={(e) => {
+                  order.user = {
+                    _id: e.detail.item._id,
+                    username: e.detail.item.username,
+                    firstName: e.detail.item.firstName,
+                    lastName: e.detail.item.lastName,
+                    email: e.detail.item.email,
+                  };
+                }}
+              >
+                <svelte:fragment slot="item" let:item
+                  >{item.username}</svelte:fragment
+                >
+              </Autocomplete>
+            </div>
           {/if}
         </Spinner>
       </Card.Content>
@@ -549,7 +616,9 @@
             <div class="flex gap-4">
               <Button on:click={handleUpdateShipping}>Save</Button>
 
-              <Button variant="outline" on:click={handleUpdateShippingCancel}>Cancel</Button>
+              <Button variant="outline" on:click={handleUpdateShippingCancel}
+                >Cancel</Button
+              >
             </div>
           {:else}
             <Button
@@ -594,8 +663,13 @@
             <Input
               type="number"
               placeholder="Name"
-              bind:value={order.shipping.price}
+              value={order.shipping.price}
               disabled={!edit_shipping_vendor}
+              on:input={(e) => {
+                order.shipping.price = e.target.value
+                  ? Number(e.target.value)
+                  : order.shipping.price;
+              }}
             />
           </div>
 
@@ -603,7 +677,9 @@
             <div class="flex gap-4">
               <Button on:click={handleUpdateShipping}>Save</Button>
 
-              <Button variant="outline" on:click={handleUpdateShippingCancel}>Cancel</Button>
+              <Button variant="outline" on:click={handleUpdateShippingCancel}
+                >Cancel</Button
+              >
             </div>
           {:else}
             <Button
@@ -628,6 +704,9 @@
             <div class="font-semibold">Title</div>
             <div class="font-semibold">Quantity</div>
             <div class="font-semibold">Price</div>
+            {#if edit}
+              <div class="font-semibold">Action</div>
+            {/if}
 
             {#each order.items as item}
               <a
