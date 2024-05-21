@@ -14,25 +14,25 @@
   import Button from "$lib/components/ui/button/button.svelte";
   import { toastMessage } from "../../../helper/utils";
   import Checkbox from "$lib/components/ui/checkbox/checkbox.svelte";
+  import { RIGHT_TYPE } from "../../../helper/constants";
 
   let loading = true;
   let edit = false;
-  let rights = [];
 
   let role = {
     name: "",
     rights: [],
   };
 
-  const initRights = async () => {
-    loading = true;
-    const response = await httpClient(fetchRight, {
-      token: $token_store,
-    });
-    if (response.status === 200) {
-      rights = response.data.rights;
-    }
-  };
+  // const initRights = async () => {
+  //   loading = true;
+  //   const response = await httpClient(fetchRight, {
+  //     token: $token_store,
+  //   });
+  //   if (response.status === 200) {
+  //     rights = response.data.rights;
+  //   }
+  // };
 
   const initRole = async (role_id) => {
     loading = true;
@@ -51,7 +51,7 @@
     loading = true;
     const response = await httpClient(updateRole, {
       method: "POST",
-      body: role,
+      payload: role,
       token: $token_store,
     });
     if (response.status === 200) {
@@ -63,10 +63,10 @@
 
   $: {
     if ($page.params._id !== "create") {
-      initRights();
+      //initRights();
       initRole($page.params._id);
     } else {
-      initRights();
+      //initRights();
       loading = false;
       edit = true;
     }
@@ -101,15 +101,15 @@
             />
           </div>
           <div class="mb-5 flex flex-col gap-2">
-            {#each rights as right}
+            {#each Object.entries(RIGHT_TYPE) as [right, value]}
               <div class="flex items-center gap-2">
                 <Checkbox
-                  checked={role.rights.includes(right)}
+                  checked={role.rights.includes(value)}
                   onCheckedChange={(v) => {
                     if (v) {
-                      role.rights = [...role.rights, right];
+                      role.rights = [...role.rights, value];
                     } else {
-                      role.rights = role.rights.filter((r) => r !== right);
+                      role.rights = role.rights.filter((r) => r !== value);
                     }
                   }}
                   disabled={!edit}

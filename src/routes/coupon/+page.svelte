@@ -11,7 +11,7 @@
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import { formatCurrency, getByValue } from "../../helper/utils";
-  import { STATUS } from "../../helper/constants";
+  import { NUMBER_TYPE, STATUS } from "../../helper/constants";
 
   let coupons = [];
   let loading = true;
@@ -69,7 +69,7 @@
                 accessor: "discount",
                 header: "Discount",
                 cell: ({ value }) =>
-                  value.type === "percentage"
+                  value.type === NUMBER_TYPE.PERCENTAGE
                     ? `${value.amount}%`
                     : formatCurrency(value.amount),
               },
