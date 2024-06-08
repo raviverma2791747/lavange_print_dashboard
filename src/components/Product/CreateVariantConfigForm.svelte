@@ -213,7 +213,7 @@
         <EditVariantConfigSchemaOptionForm
           on:save={handleEditVariantConfigSchemaOptionSave}
           on:cancel={handleEditVariantConfigSchemaOptionCancel}
-          bind:variantSchemaOptionClone={variantSchemaOption}
+          bind:variantSchemaOption={variantSchemaOption}
         />
       {:else}
         <VariantSchemaOption
