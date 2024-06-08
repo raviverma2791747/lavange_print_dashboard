@@ -74,7 +74,7 @@
       return false;
     }
 
-    if (!data.type) {
+    if (!data.type && data.type !== 0) {
       console.log("no type");
       return false;
     }
