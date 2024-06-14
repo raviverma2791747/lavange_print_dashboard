@@ -7,7 +7,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchCoupon } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import { formatCurrency, getByValue } from "../../helper/utils";
@@ -21,9 +20,7 @@
   };
 
   const initCoupons = async () => {
-    const response = await httpClient(fetchCoupon, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchCoupon);
     if (response.status === 200) {
       coupons = response.data.coupons ?? [];
     }

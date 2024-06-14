@@ -4,7 +4,7 @@
   import Header from "../components/Header.svelte";
   import Sidebar from "../components/Sidebar.svelte";
   import { page } from "$app/stores";
-  import { token_store, user_info_store } from "../helper/store";
+  import {  user_info_store } from "../helper/store";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { httpClient } from "../helper/httpClient";
@@ -22,27 +22,19 @@
   };
 
   const initUserInfo = async () => {
-    const response = await httpClient(userInfo, {
-      token: $token_store,
-    });
+    const response = await httpClient(userInfo, );
 
     if (response.status === 200) {
       user_info_store.set(response.data.user);
     } else {
-      token_store.set(null);
+     
       if (browser) {
         goto("/login");
       }
     }
   };
 
-  token_store.subscribe((token) => {
-    if (token) {
-      initUserInfo();
-    } else {
-      user_info_store.set(null);
-    }
-  });
+ 
 
   user_info_store.subscribe((user) => {
     if (user) {
@@ -61,15 +53,8 @@
     initial_load = false;
   });
 
-  onMount(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      token_store.set(token);
-    } else {
-      if (browser) {
-        goto("/login");
-      }
-    }
+  onMount(async () => {
+    await initUserInfo();
   });
 </script>
 
@@ -77,7 +62,7 @@
 <div class="flex flex-col min-h-screen">
   {#if $page.url.pathname === "/login"}
     <slot />
-  {:else if $user_info_store && $token_store}
+  {:else if $user_info_store}
     <Header />
     <div class="flex grow">
       <div

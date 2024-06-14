@@ -4,7 +4,6 @@
   import { page } from "$app/stores";
   import Spinner from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import {
     fetchFacet,
     getCategory,
@@ -45,7 +44,6 @@
     loading = true;
     const response = await httpClient(updateCategory, {
       method: "POST",
-      token: $token_store,
       payload: category,
     });
 
@@ -63,9 +61,7 @@
 
   const initCategory = async (id) => {
     loading = true;
-    const response = await httpClient(`${getCategory}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getCategory}/${id}`);
     if (response.status === 200) {
       category = response.data.category ?? category;
     }
@@ -83,7 +79,6 @@
     if (search) {
       const response = await httpClient(fetchFacet, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -112,9 +107,7 @@
     if ($facet_cache.has(id)) {
       return $facet_cache.get(id);
     } else {
-      const response = await httpClient(`${getFacet}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getFacet}/${id}`);
       if (response.status === 200) {
         let facet = response.data.facet ?? null;
         if (facet) {

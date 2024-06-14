@@ -4,7 +4,6 @@
   import { page } from "$app/stores";
   import { httpClient } from "../../../helper/httpClient";
   import * as Table from "$lib/components/ui/table";
-  import { token_store } from "../../../helper/store";
   import {
     fetchUser,
     getOrder,
@@ -111,7 +110,6 @@
   const handleSave = async () => {
     await httpClient(`${updateOrder}/${$page.params.id}`, {
       method: "POST",
-      token: $token_store,
       payload: order,
     });
   };
@@ -119,7 +117,6 @@
   const handleUpdateStatus = async () => {
     const response = await httpClient(updateOrderStatus, {
       method: "POST",
-      token: $token_store,
       payload: {
         _id: $page.params.id,
         status: order.status,
@@ -138,7 +135,6 @@
   const handleUpdateShipping = async () => {
     const response = await httpClient(updateOrderShipping, {
       method: "POST",
-      token: $token_store,
       payload: {
         _id: $page.params.id,
         shipping: order.shipping,
@@ -181,9 +177,7 @@
 
   const initOrder = async (id) => {
     loading = true;
-    const response = await httpClient(`${getOrder}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getOrder}/${id}`, {});
     if (response.status === 200) {
       order = response.data.order;
       order_default = structuredClone(response.data.order);
@@ -193,9 +187,7 @@
 
   const initProduct = async (product_id) => {
     loading = true;
-    const response = await httpClient(`${getProduct}/${product_id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getProduct}/${product_id}`);
     if (response.status === 200) {
       products.set(product_id, response.data.product);
     }
@@ -208,7 +200,6 @@
     if (search) {
       const response = await httpClient(fetchUser, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {

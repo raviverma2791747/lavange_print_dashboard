@@ -3,7 +3,6 @@
   import { onMount } from "svelte";
   import { getStats } from "../helper/endpoints";
   import { httpClient } from "../helper/httpClient";
-  import { token_store } from "../helper/store";
   import { format } from "date-fns";
   import * as Card from "$lib/components/ui/card";
   import { formatCurrency, formatDate } from "../helper/utils";
@@ -31,9 +30,7 @@
 
   const initStats = async () => {
     loading = true;
-    const response = await httpClient(getStats, {
-      token: $token_store,
-    });
+    const response = await httpClient(getStats, );
     if (response.status === 200) {
       stats = response.data;
     }

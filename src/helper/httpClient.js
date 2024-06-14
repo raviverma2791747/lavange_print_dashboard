@@ -33,6 +33,7 @@ export const httpClient = async (
   }
 
   options.headers = headers;
+  options.credentials = "include";
 
   try {
     const response = await fetch(url, options);

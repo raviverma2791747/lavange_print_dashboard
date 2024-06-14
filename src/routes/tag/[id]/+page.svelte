@@ -5,7 +5,6 @@
   import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { getTag, updateTag } from "../../../helper/endpoints";
-  import { token_store } from "../../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import Input from "$lib/components/ui/input/input.svelte";
@@ -24,7 +23,6 @@
     loading = true;
     const response = await httpClient(updateTag, {
       method: "POST",
-      token: $token_store,
       payload: tag,
     });
 
@@ -42,9 +40,7 @@
 
   const initTag = async (id) => {
     loading = true;
-    const response = await httpClient(`${getTag}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getTag}/${id}`);
     if (response.status === 200) {
       tag = response.data.tag;
     }

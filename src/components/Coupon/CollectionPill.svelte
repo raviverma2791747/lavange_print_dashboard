@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { getCollection } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { collection_cache } from "../../helper/cache_store";
   import { createEventDispatcher } from "svelte";
   import CloseIcon from "../svg/CloseIcon.svelte";
@@ -20,9 +19,7 @@
     if ($collection_cache.has(id)) {
       collection = $collection_cache.get(id);
     } else {
-      const response = await httpClient(`${getCollection}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCollection}/${id}`, );
       if (response.status === 200) {
         collection = response.data.collection;
       }

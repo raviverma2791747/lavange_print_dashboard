@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { getUser } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { user_cache } from "../../helper/cache_store";
   import { createEventDispatcher } from "svelte";
   import CloseIcon from "../svg/CloseIcon.svelte";
@@ -20,9 +19,7 @@
     if ($user_cache.has(id)) {
       user = $user_cache.get(id);
     } else {
-      const response = await httpClient(`${getUser}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getUser}/${id}`,);
       if (response.status === 200) {
         user = response.data.user;
       }

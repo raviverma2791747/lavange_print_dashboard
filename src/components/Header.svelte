@@ -2,7 +2,7 @@
   //@ts-nocheck
   import type { MouseEventHandler } from "svelte/elements";
   import MenuIcon from "./svg/MenuIcon.svelte";
-  import { token_store, user_info_store } from "../helper/store";
+  import {  user_info_store } from "../helper/store";
   import BellIcon from "./svg/BellIcon.svelte";
   import { socket } from "../socket";
   import Button from "$lib/components/ui/button/button.svelte";
@@ -25,7 +25,6 @@
   let name;
 
   const handleLogout = () => {
-    token_store.set(null);
     localStorage.removeItem("token");
   };
 

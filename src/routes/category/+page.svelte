@@ -3,7 +3,6 @@
   import { goto } from "$app/navigation";
   import Loading from "../../components/Spinner.svelte";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { fetchCategory } from "../../helper/endpoints";
   import { formatDate, getByValue } from "../../helper/utils";
   import { DATE_TIME_FORMAT, STATUS } from "../../helper/constants";
@@ -20,9 +19,7 @@
 
   const initCategories = async () => {
     loading = true;
-    const response = await httpClient(fetchCategory, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchCategory);
     if (response.status === 200) {
       categories = response.data.categories ?? [];
     }

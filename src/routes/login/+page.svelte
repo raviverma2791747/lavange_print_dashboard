@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { userLogin } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store, user_info_store } from "../../helper/store";
+  import { user_info_store } from "../../helper/store";
   import Label from "$lib/components/ui/label/label.svelte";
   import Input from "$lib/components/ui/input/input.svelte";
   import * as Card from "$lib/components/ui/card";
@@ -18,9 +18,9 @@
   };
 
   const login = async () => {
-    if(!user.username || !user.password) {
+    if (!user.username || !user.password) {
       toastMessage("Please provide username and password", "error");
-      return
+      return;
     }
     const response = await httpClient(userLogin, {
       method: "POST",
@@ -28,8 +28,6 @@
     });
 
     if (response.status === 200) {
-      localStorage.setItem("token", response.data.token);
-      token_store.set(response.data.token);
       toastMessage("Logged in successfully");
     }
   };

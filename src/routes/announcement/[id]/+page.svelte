@@ -3,7 +3,6 @@
   import { page } from "$app/stores";
   import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import {
     getAnnouncement,
     updateAnnouncement,
@@ -36,7 +35,6 @@
     loading = true;
     const response = await httpClient(updateAnnouncement, {
       method: "POST",
-      token: $token_store,
       payload: announcement,
     });
 
@@ -54,9 +52,7 @@
 
   const initAnnouncement = async (id) => {
     loading = true;
-    const response = await httpClient(`${getAnnouncement}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getAnnouncement}/${id}`);
     if (response.status === 200) {
       announcement = response.data.announcement;
     }

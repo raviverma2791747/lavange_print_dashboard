@@ -5,7 +5,6 @@
   import Spinner from "../../../components/Spinner.svelte";
   import { getFacet, updateFacet } from "../../../helper/endpoints";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import Button from "$lib/components/ui/button/button.svelte";
   import * as Card from "$lib/components/ui/card";
   import Input from "$lib/components/ui/input/input.svelte";
@@ -36,7 +35,6 @@
     loading = true;
     const response = await httpClient(updateFacet, {
       method: "POST",
-      token: $token_store,
       payload: facet,
     });
 
@@ -55,9 +53,7 @@
 
   const initFacet = async (id) => {
     loading = true;
-    const response = await httpClient(`${getFacet}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getFacet}/${id}`);
     if (response.status === 200) {
       facet = response.data.facet;
     }

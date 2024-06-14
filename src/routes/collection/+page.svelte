@@ -5,7 +5,6 @@
   import { onMount } from "svelte";
   import Loading from "../../components/Spinner.svelte";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { fetchCollection } from "../../helper/endpoints";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
@@ -38,9 +37,7 @@
 
   const initCollections = async () => {
     loading = true;
-    const response = await httpClient(fetchCollection, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchCollection);
     if (response.status === 200) {
       collections = response.data.collections;
     }
