@@ -10,7 +10,6 @@
     getImage,
     updateImage,
   } from "../../../helper/endpoints";
-  import { token_store } from "../../../helper/store";
   import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
   import ImageView from "../../../components/ImageView.svelte";
   import ImageUpload from "../../../components/ImageUpload.svelte";
@@ -32,7 +31,6 @@
     loading = true;
     const response = await httpClient(updateImage, {
       method: "POST",
-      token: $token_store,
       payload: {
         title: previewImage.title,
         id: $page.params.id,

@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { getFacet } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { facet_cache } from "../../helper/cache_store";
   import { createEventDispatcher } from "svelte";
   import CloseIcon from "../svg/CloseIcon.svelte";
@@ -20,9 +19,7 @@
     if ($facet_cache.has(id)) {
       facet = $facet_cache.get(id);
     } else {
-      const response = await httpClient(`${getFacet}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getFacet}/${id}`);
       if (response.status === 200) {
         facet = response.data.facet;
       }

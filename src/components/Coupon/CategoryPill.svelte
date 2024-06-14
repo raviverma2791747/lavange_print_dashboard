@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { getCategory } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { category_cache } from "../../helper/cache_store";
   import { createEventDispatcher } from "svelte";
   import CloseIcon from "../svg/CloseIcon.svelte";
@@ -20,9 +19,7 @@
     if ($category_cache.has(id)) {
       category = $category_cache.get(id);
     } else {
-      const response = await httpClient(`${getCategory}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCategory}/${id}`, );
       if (response.status === 200) {
         category = response.data.category;
       }

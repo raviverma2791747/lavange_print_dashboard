@@ -5,7 +5,6 @@
   import Loading from "../../components/Spinner.svelte";
   import { httpClient } from "../../helper/httpClient";
   import { fetchCategory, fetchTag } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import { formatDate } from "../../helper/utils";
   import { DATE_TIME_FORMAT } from "../../helper/constants";
   import * as Card from "$lib/components/ui/card";
@@ -21,9 +20,7 @@
 
   const initTags = async () => {
     loading = true;
-    const response = await httpClient(fetchTag, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchTag, );
     if (response.status === 200) {
       tags = response.data.tags ?? [];
     }

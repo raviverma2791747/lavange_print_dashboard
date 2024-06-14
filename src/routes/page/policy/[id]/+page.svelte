@@ -3,7 +3,6 @@
   import { onMount } from "svelte";
   import Loading from "../../../../components/Spinner.svelte";
   import { httpClient } from "../../../../helper/httpClient";
-  import { token_store } from "../../../../helper/store";
   import { updatePolicy } from "../../../../helper/endpoints";
   import { getPolicy } from "../../../../helper/endpoints";
   import Editor from "../../../../components/Editor.svelte";
@@ -28,16 +27,13 @@
   const handleSave = async () => {
     await httpClient(updatePolicy, {
       method: "POST",
-      token: $token_store,
       payload: policy,
     });
   };
 
   const initPolicy = async () => {
     loading = true;
-    const response = await httpClient(`${getPolicy}/${$page.params.id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getPolicy}/${$page.params.id}`);
     if (response.status === 200) {
       policy = response.data.policy ?? policy;
     }

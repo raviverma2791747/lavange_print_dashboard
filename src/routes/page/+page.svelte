@@ -8,7 +8,6 @@
   import DataTable from "../../components/DataTable.svelte";
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { fetchConfig } from "../../helper/endpoints";
   import * as Card from "$lib/components/ui/card";
   import { DATE_TIME_FORMAT, STATUS } from "../../helper/constants";
@@ -27,9 +26,7 @@
 
   const initConfigs = async () => {
     loading = true;
-    const response = await httpClient(fetchConfig, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchConfig);
     if (response.status === 200) {
       configs = response.data.configs;
     }

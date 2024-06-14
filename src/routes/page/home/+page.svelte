@@ -3,7 +3,6 @@
   import { onMount } from "svelte";
   import { page } from "$app/stores";
   import { format } from "date-fns";
-  import { token_store } from "../../../helper/store";
   import { httpClient } from "../../../helper/httpClient";
   import {
     fetchAnnouncement,
@@ -59,7 +58,6 @@
     loading = true;
     const response = await httpClient(updateHomeConfig, {
       method: "POST",
-      token: $token_store,
       payload: homeConfig,
     });
 
@@ -73,9 +71,7 @@
   };
 
   const initHomeConfig = async () => {
-    const response = await httpClient(fetchHomeConfig, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchHomeConfig);
     if (response.status === 200) {
       homeConfig = response.data.homeConfig;
     }
@@ -85,7 +81,6 @@
     if (search) {
       const response = await httpClient(fetchCategory, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -106,7 +101,6 @@
     if (search) {
       const response = await httpClient(fetchAnnouncement, {
         params: { search },
-        token: $token_store,
       });
       if (response.status === 200) {
         suggested_announcements = response.data.announcements ?? [];
@@ -126,7 +120,6 @@
     if (search) {
       const response = await httpClient(fetchCollection, {
         params: { search },
-        token: $token_store,
       });
       if (response.status === 200) {
         suggested_collections = response.data.collections ?? [];
@@ -146,7 +139,6 @@
     if (search) {
       const response = await httpClient(fetchProduct, {
         params: { search },
-        token: $token_store,
       });
       if (response.status === 200) {
         suggested_products = response.data.products ?? [];
@@ -166,9 +158,7 @@
     if ($category_cache.has(id)) {
       return $category_cache.get(id);
     } else {
-      const response = await httpClient(`${getCategory}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCategory}/${id}`);
       if (response.status === 200) {
         let category = response.data.category ?? null;
 
@@ -185,9 +175,7 @@
     if ($announcement_cache.has(id)) {
       return $announcement_cache.get(id);
     } else {
-      const response = await httpClient(`${getAnnouncement}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getAnnouncement}/${id}`, {});
       if (response.status === 200) {
         let announcement = response.data.announcement ?? null;
 
@@ -204,9 +192,7 @@
     if ($collection_cache.has(id)) {
       return $collection_cache.get(id);
     } else {
-      const response = await httpClient(`${getCollection}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCollection}/${id}`, {});
       if (response.status === 200) {
         let collection = response.data.collection ?? null;
 
@@ -224,9 +210,7 @@
     if ($product_cache.has(id)) {
       return $product_cache.get(id);
     } else {
-      const response = await httpClient(`${getProduct}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getProduct}/${id}`, {});
       if (response.status === 200) {
         let product = response.data.product ?? null;
         if (product) {

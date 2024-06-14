@@ -6,7 +6,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchUser } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import { getByValue } from "../../helper/utils";
@@ -21,9 +20,7 @@
 
   const initUsers = async () => {
     loading = true;
-    const response = await httpClient(fetchUser, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchUser);
     if (response.status === 200) {
       users = response.data.users ?? [];
     }

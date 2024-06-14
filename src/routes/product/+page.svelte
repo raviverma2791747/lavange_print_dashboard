@@ -5,7 +5,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchProduct } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import Button from "$lib/components/ui/button/button.svelte";
   import * as Card from "$lib/components/ui/card";
   import DataTable from "../../components/DataTable.svelte";
@@ -21,9 +20,7 @@
 
   const initProducts = async () => {
     loading = true;
-    const response = await httpClient(fetchProduct, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchProduct);
 
     if (response.status === 200) {
       products = response.data.products;

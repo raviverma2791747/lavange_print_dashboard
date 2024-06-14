@@ -3,7 +3,6 @@
   import { goto } from "$app/navigation";
   import Loading from "../../components/Spinner.svelte";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { fetchAnnouncement } from "../../helper/endpoints";
   import { formatDate, getByValue } from "../../helper/utils";
   import { DATE_TIME_FORMAT, STATUS } from "../../helper/constants";
@@ -16,9 +15,7 @@
 
   const initAnnouncements = async () => {
     loading = true;
-    const response = await httpClient(fetchAnnouncement, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchAnnouncement, );
     if (response.status === 200) {
       annoucements = response.data.announcements ?? [];
     }

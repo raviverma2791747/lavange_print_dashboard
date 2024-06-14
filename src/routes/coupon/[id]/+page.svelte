@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { page } from "$app/stores";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import {
     user_cache,
     product_cache,
@@ -104,7 +103,6 @@
     loading = true;
     const response = await httpClient(`${getCoupon}/${id}`, {
       params: { _id: id },
-      token: $token_store,
     });
     if (response.status === 200) {
       coupon = response.data.coupon;
@@ -139,7 +137,6 @@
           endDate: coupon.validity.endDate.toDate(getLocalTimeZone()),
         },
       },
-      token: $token_store,
     });
     if (response.status === 200) {
       //goto(`/coupon/${response.data.coupon.id}`, { replaceState: true });
@@ -156,7 +153,6 @@
     if (search) {
       const response = await httpClient(fetchUser, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -177,7 +173,6 @@
     if (search) {
       const response = await httpClient(fetchProduct, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -198,7 +193,6 @@
     if (search) {
       const response = await httpClient(fetchCategory, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -219,7 +213,6 @@
     if (search) {
       const response = await httpClient(fetchCollection, {
         params: { search },
-        token: $token_store,
       });
 
       if (response.status === 200) {
@@ -240,9 +233,7 @@
     if ($category_cache.has(id)) {
       return $category_cache.get(id);
     } else {
-      const response = await httpClient(`${getCategory}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCategory}/${id}`);
       if (response.status === 200) {
         let category = response.data.category ?? null;
 
@@ -259,9 +250,7 @@
     if ($collection_cache.has(id)) {
       return $collection_cache.get(id);
     } else {
-      const response = await httpClient(`${getCollection}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getCollection}/${id}`);
       if (response.status === 200) {
         let collection = response.data.collection ?? null;
 
@@ -278,9 +267,7 @@
     if ($product_cache.has(id)) {
       return $product_cache.get(id);
     } else {
-      const response = await httpClient(`${getProduct}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getProduct}/${id}`);
       if (response.status === 200) {
         let product = response.data.product ?? null;
         if (product) {
@@ -296,9 +283,7 @@
     if ($user_cache.has(id)) {
       return $user_cache.get(id);
     } else {
-      const response = await httpClient(`${getUser}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getUser}/${id}`);
       if (response.status === 200) {
         let user = response.data.user ?? null;
         if (user) {

@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { httpClient } from "../../../helper/httpClient";
   import { deleteImage, fetchImage } from "../../../helper/endpoints";
-  import { token_store } from "../../../helper/store";
   import Loading from "../../../components/Spinner.svelte";
   import DeleteIcon from "../../../components/svg/DeleteIcon.svelte";
   import ImageView from "../../../components/ImageView.svelte";
@@ -13,9 +12,7 @@
 
   const initImages = async () => {
     loading = true;
-    const response = await httpClient(fetchImage, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchImage);
     if (response.status === 200) {
       images = response.data.images ?? [];
     }
@@ -25,7 +22,6 @@
   const removeImage = async (id) => {
     const response = await httpClient(`${deleteImage}/${id}`, {
       method: "DELETE",
-      token: $token_store,
     });
     if (response.status === 200) {
       await initImages();

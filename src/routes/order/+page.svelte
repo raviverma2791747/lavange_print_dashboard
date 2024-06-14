@@ -5,7 +5,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchOrder } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import { formatCurrency, getByValue } from "../../helper/utils";
   import * as Card from "$lib/components/ui/card";
   import DataTable from "../../components/DataTable.svelte";
@@ -22,9 +21,7 @@
 
   const initOrders = async () => {
     loading = true;
-    const response = await httpClient(fetchOrder, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchOrder);
 
     if (response.status === 200) {
       orders = response.data.orders;
@@ -63,7 +60,7 @@
                 header: "Status",
                 cell: ({ value }) => {
                   return getByValue(ORDER_STATUS, value);
-                }
+                },
               },
               {
                 accessor: "items",

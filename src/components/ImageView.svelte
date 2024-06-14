@@ -1,6 +1,5 @@
 <script>
   //@ts-nocheck
-  import { token_store } from "../helper/store";
   import Spinner from "./Spinner.svelte";
   import DeleteIcon from "./svg/DeleteIcon.svelte";
   import { httpClient } from "../helper/httpClient";
@@ -21,9 +20,7 @@
   const initImage = async (id) => {
     loading = true;
     if (id !== "create") {
-      const response = await httpClient(`${getImage}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getImage}/${id}`);
 
       if (response.status === 200) {
         previewImage = response.data.image;

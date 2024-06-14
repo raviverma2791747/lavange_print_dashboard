@@ -7,7 +7,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchFacet } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
 
@@ -19,9 +18,7 @@
   };
 
   const initFacets = async () => {
-    const response = await httpClient(fetchFacet, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchFacet);
     if (response.status === 200) {
       facets = response.data.facets ?? [];
     }

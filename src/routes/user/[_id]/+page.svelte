@@ -3,7 +3,6 @@
   import { page } from "$app/stores";
   import { httpClient } from "../../../helper/httpClient";
   import { fetchRole, getUser, updateUser } from "../../../helper/endpoints";
-  import { token_store } from "../../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Spinner from "../../../components/Spinner.svelte";
   import Label from "$lib/components/ui/label/label.svelte";
@@ -33,9 +32,7 @@
   };
 
   const initRoles = async () => {
-    const response = await httpClient(fetchRole, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchRole, {});
     if (response.status === 200) {
       roles = response.data.roles ?? [];
     }
@@ -43,9 +40,7 @@
 
   const initUser = async (user_id) => {
     if (user_id !== "create") {
-      const response = await httpClient(`${getUser}/${user_id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getUser}/${user_id}`, {});
       if (response.status === 200) {
         user = response.data.user;
       }
@@ -64,7 +59,6 @@
     const response = await httpClient(updateUser, {
       method: "POST",
       payload: user,
-      token: $token_store,
     });
 
     if (response.status === 200) {

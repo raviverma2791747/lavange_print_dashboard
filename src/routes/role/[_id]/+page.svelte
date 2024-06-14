@@ -7,7 +7,6 @@
   import Spinner from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import { fetchRight, getRole, updateRole } from "../../../helper/endpoints";
-  import { token_store } from "../../../helper/store";
   import Label from "$lib/components/ui/label/label.svelte";
   import * as Card from "$lib/components/ui/card";
   import Input from "$lib/components/ui/input/input.svelte";
@@ -27,7 +26,6 @@
   // const initRights = async () => {
   //   loading = true;
   //   const response = await httpClient(fetchRight, {
-  //     token: $token_store,
   //   });
   //   if (response.status === 200) {
   //     rights = response.data.rights;
@@ -37,9 +35,7 @@
   const initRole = async (role_id) => {
     loading = true;
     if (role_id !== "create") {
-      const response = await httpClient(`${getRole}/${role_id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getRole}/${role_id}`, );
       if (response.status === 200) {
         role = response.data.role;
       }
@@ -52,7 +48,7 @@
     const response = await httpClient(updateRole, {
       method: "POST",
       payload: role,
-      token: $token_store,
+     
     });
     if (response.status === 200) {
       toastMessage("Role updated successfully");

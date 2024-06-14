@@ -4,7 +4,6 @@
   import { createImage } from "../helper/endpoints";
 
   import { httpClient } from "../helper/httpClient";
-  import { token_store } from "../helper/store";
 
   import Loading from "./Loading.svelte";
   import Spinner from "./Spinner.svelte";
@@ -26,7 +25,6 @@
 
       const response = await httpClient(createImage, {
         method: "POST",
-        token: $token_store,
         formData: formData,
       });
 

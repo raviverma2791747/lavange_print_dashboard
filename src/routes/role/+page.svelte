@@ -7,7 +7,6 @@
   import { format } from "date-fns";
   import { httpClient } from "../../helper/httpClient";
   import { fetchRole } from "../../helper/endpoints";
-  import { token_store } from "../../helper/store";
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
 
@@ -19,9 +18,7 @@
   };
 
   const initRoles = async () => {
-    const response = await httpClient(fetchRole, {
-      token: $token_store,
-    });
+    const response = await httpClient(fetchRole);
     if (response.status === 200) {
       roles = response.data.roles ?? [];
     }

@@ -4,7 +4,6 @@
   import { page } from "$app/stores";
   import Loading from "../../../components/Spinner.svelte";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import { getCollection, updateCollection } from "../../../helper/endpoints";
   import Editor from "../../../components/Editor.svelte";
   import slug from "slug";
@@ -38,7 +37,6 @@
     loading = true;
     const response = await httpClient(updateCollection, {
       method: "POST",
-      token: $token_store,
       payload: collection,
     });
 
@@ -57,9 +55,7 @@
 
   const initCollection = async (id) => {
     loading = true;
-    const response = await httpClient(`${getCollection}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getCollection}/${id}`);
     if (response.status === 200) {
       collection = response.data.collection;
     }

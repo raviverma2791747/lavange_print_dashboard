@@ -2,7 +2,6 @@
   //@ts-nocheck
   import { getProduct } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
-  import { token_store } from "../../helper/store";
   import { product_cache } from "../../helper/cache_store";
   import { createEventDispatcher } from "svelte";
   import CloseIcon from "../svg/CloseIcon.svelte";
@@ -20,9 +19,7 @@
     if ($product_cache.has(id)) {
       product = $product_cache.get(id);
     } else {
-      const response = await httpClient(`${getProduct}/${id}`, {
-        token: $token_store,
-      });
+      const response = await httpClient(`${getProduct}/${id}`, );
       if (response.status === 200) {
         product = response.data.product;
       }

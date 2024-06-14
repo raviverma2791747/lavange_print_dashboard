@@ -12,7 +12,6 @@
   import lodash from "lodash";
   import VariantConfigs from "../../../components/Product/VariantConfigs.svelte";
   import { httpClient } from "../../../helper/httpClient";
-  import { token_store } from "../../../helper/store";
   import {
     getProduct,
     updateProduct,
@@ -161,7 +160,7 @@
     loading = true;
     const response = await httpClient(updateProduct, {
       method: "POST",
-      token: $token_store,
+
       payload: product,
     });
     if (response.status === 200) {
@@ -171,7 +170,7 @@
       goto(`/product/${response.data.product.id}`, {
         replaceState: true,
       });
-      edit=false;
+      edit = false;
     }
 
     loading = false;
@@ -245,7 +244,6 @@
   const searchTag = async (search) => {
     const response = await httpClient(fetchTag, {
       params: { search },
-      token: $token_store,
     });
     if (response.status === 200) {
       tags = response.data.tags;
@@ -257,7 +255,6 @@
   const searchCollection = async (search) => {
     const response = await httpClient(fetchCollection, {
       params: { search },
-      token: $token_store,
     });
     if (response.status === 200) {
       collections = response.data.collections;
@@ -269,7 +266,6 @@
   const searchCategory = async (search) => {
     const response = await httpClient(fetchCategory, {
       params: { search },
-      token: $token_store,
     });
     if (response.status === 200) {
       categories = response.data.categories;
@@ -305,9 +301,7 @@
 
   const initProduct = async (id) => {
     loading = true;
-    const response = await httpClient(`${getProduct}/${id}`, {
-      token: $token_store,
-    });
+    const response = await httpClient(`${getProduct}/${id}`);
     if (response.status === 200) {
       product = response.data.product;
       product_ = structuredClone(product);
