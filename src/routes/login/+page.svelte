@@ -2,7 +2,7 @@
   //@ts-nocheck
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { userLogin } from "../../helper/endpoints";
+  import { userInfo, userLogin } from "../../helper/endpoints";
   import { httpClient } from "../../helper/httpClient";
   import { user_info_store } from "../../helper/store";
   import Label from "$lib/components/ui/label/label.svelte";
@@ -17,6 +17,14 @@
     password: "",
   };
 
+  const initUserInfo = async () => {
+    const response = await httpClient(userInfo);
+
+    if (response.status === 200) {
+      user_info_store.set(response.data.user);
+    }
+  };
+
   const login = async () => {
     if (!user.username || !user.password) {
       toastMessage("Please provide username and password", "error");
@@ -28,6 +36,7 @@
     });
 
     if (response.status === 200) {
+      await initUserInfo();
       toastMessage("Logged in successfully");
     }
   };
