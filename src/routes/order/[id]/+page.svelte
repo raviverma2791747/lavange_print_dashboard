@@ -30,6 +30,7 @@
     PAYMENT_STATUS,
     PAYMENT_GATEWAY,
     PAYMENT_MODE,
+    ADDRESS_TYPE,
   } from "../../../helper/constants";
   import * as Select from "$lib/components/ui/select";
   import Input from "$lib/components/ui/input/input.svelte";
@@ -128,7 +129,7 @@
 
     if (response.status === 200) {
       edit_status = false;
-      initOrder();
+      await initOrder($page.params.id);
     }
   };
 
@@ -143,9 +144,9 @@
     });
 
     if (response.status === 200) {
-      console.log("ok");
       edit_shipping = false;
-      initOrder();
+      edit_shipping_vendor = false;
+      await initOrder($page.params.id);
     }
   };
 
@@ -533,12 +534,25 @@
 
           <div class="mb-5">
             <Label for="title">Type</Label>
-            <Input
-              type="text"
-              placeholder="Name"
-              bind:value={order.address.type}
+            <Select.Root
               disabled={!edit_shipping}
-            />
+              selected={{
+                value: order.address.type,
+                label: getByValue(ADDRESS_TYPE, order.address.type),
+              }}
+              onSelectedChange={(v) => {
+                v && (order.address.type = v.value);
+              }}
+            >
+              <Select.Trigger>
+                <Select.Value class="capitalize" placeholder="Status" />
+              </Select.Trigger>
+              <Select.Content>
+                {#each Object.entries(ADDRESS_TYPE) as [key, value]}
+                  <Select.Item {value} label={key} />
+                {/each}
+              </Select.Content>
+            </Select.Root>
           </div>
 
           <div class="mb-5">

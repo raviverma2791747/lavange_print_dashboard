@@ -47,3 +47,6 @@ export const updatePolicy = "/private/config/policy";
 export const getFacet = "/private/facet";
 export const fetchFacet = "/private/facet";
 export const updateFacet = "/private/facet";
+export const getServerConfig = "/private/config/server";
+export const updateServerConfig = "/private/config/server";
+export const userLogout = "/public/user/logout";

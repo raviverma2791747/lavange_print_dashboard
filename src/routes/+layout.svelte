@@ -4,7 +4,7 @@
   import Header from "../components/Header.svelte";
   import Sidebar from "../components/Sidebar.svelte";
   import { page } from "$app/stores";
-  import {  user_info_store } from "../helper/store";
+  import { user_info_store } from "../helper/store";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { httpClient } from "../helper/httpClient";
@@ -13,6 +13,7 @@
   import Loading from "../components/Loading.svelte";
   import { ModeWatcher } from "mode-watcher";
   import { Toaster } from "$lib/components/ui/sonner";
+  import { RIGHT_TYPE } from "../helper/constants";
 
   let sidebarOpen = true;
   let initial_load = true;
@@ -22,33 +23,29 @@
   };
 
   const initUserInfo = async () => {
-    const response = await httpClient(userInfo, );
+    const response = await httpClient(userInfo);
 
     if (response.status === 200) {
-      user_info_store.set(response.data.user);
-    } else {
-     
-      if (browser) {
+      const user = response.data.user;
+      if (user.role.rights.includes(RIGHT_TYPE.ADMIN_ACCESS)) {
+        user_info_store.set(response.data.user);
+      } else {
         goto("/login");
       }
+    } else {
+      goto("/login");
     }
   };
 
- 
-
   user_info_store.subscribe((user) => {
     if (user) {
-      if (browser) {
-        if ($page.url.pathname === "/login") {
-          goto("/");
-        } else {
-          goto($page.url.pathname);
-        }
+      if ($page.url.pathname === "/login") {
+        goto("/");
+      } else {
+        goto($page.url.pathname);
       }
     } else if (!initial_load) {
-      if (browser) {
-        goto("/login");
-      }
+      goto("/login");
     }
     initial_load = false;
   });

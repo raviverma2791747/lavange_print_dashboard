@@ -2,7 +2,7 @@
   //@ts-nocheck
   import type { MouseEventHandler } from "svelte/elements";
   import MenuIcon from "./svg/MenuIcon.svelte";
-  import {  user_info_store } from "../helper/store";
+  import { user_info_store } from "../helper/store";
   import BellIcon from "./svg/BellIcon.svelte";
   import { socket } from "../socket";
   import Button from "$lib/components/ui/button/button.svelte";
@@ -18,14 +18,23 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import * as Popover from "$lib/components/ui/popover";
   import { goto } from "$app/navigation";
+  import { httpClient } from "../helper/httpClient";
+  import { userLogout } from "../helper/endpoints";
 
   export let sidebarOpen: Boolean;
   export let toggleSidebar: MouseEventHandler<HTMLButtonElement>;
 
   let name;
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    const response = await httpClient(userLogout,{
+      method: "POST",
+    });
+
+    if (response.status === 200) {
+      $user_info_store = null;
+      goto("/login");
+    }
   };
 
   const handle = () => {

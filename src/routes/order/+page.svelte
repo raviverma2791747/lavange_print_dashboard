@@ -53,7 +53,7 @@
               {
                 accessor: "user",
                 header: "Customer",
-                cell: ({ value }) => value.username,
+                cell: ({ value }) => value.username ?? "N/A",
               },
               {
                 accessor: "status",
