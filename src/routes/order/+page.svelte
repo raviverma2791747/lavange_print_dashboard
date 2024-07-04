@@ -67,7 +67,7 @@
                 header: "total",
                 cell: ({ value }) =>
                   formatCurrency(
-                    value.reduce((acc, item) => acc + item.price, 0)
+                    value.reduce((acc, item) => acc + item.price * item.quantity, 0) 
                   ),
               },
               {

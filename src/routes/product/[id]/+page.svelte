@@ -49,6 +49,7 @@
     inventoryQuantity: 0,
     neverOutOfStock: false,
     hasSKU: false,
+    hsnCode: "",
     sku: "",
     barcode: "",
     status: STATUS.DRAFT,
@@ -687,6 +688,27 @@
                       bind:value={product.barcode}
                     />
                   </div>
+                </div>
+              {/if}
+            </div>
+
+            <div class="py-2">
+              <!-- <div class="flex gap-2 items-center" class:mb-2={product.hasSKU}>
+                <Checkbox bind:checked={product.hasSKU} disabled={!edit} />
+                <Label for="default-checkbox"
+                  >This product has a SKU or Barcode</Label
+                >
+              </div> -->
+
+              {#if true}
+                <div>
+                  <Label for="trackQuantity">HSN Code</Label>
+                  <Input
+                    disabled={!edit}
+                    type="text"
+                    placeholder="HSN"
+                    bind:value={product.hsnCode}
+                  />
                 </div>
               {/if}
             </div>
