@@ -143,7 +143,10 @@
       toastMessage(
         `Coupon ${$page.params.id === "create" ? "created" : "updated"} successfully`
       );
-      await initCoupon($page.params.id);
+
+      await initCoupon(
+        $page.params.id === "create" ? response.data.coupon.id : $page.params.id
+      );
       loading = false;
       edit = false;
     }

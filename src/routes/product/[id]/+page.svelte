@@ -10,7 +10,6 @@
   import CloseIcon from "../../../components/svg/CloseIcon.svelte";
   import Autocomplete from "../../../components/Autocomplete.svelte";
   import lodash from "lodash";
-  import VariantConfigs from "../../../components/Product/VariantConfigs.svelte";
   import { httpClient } from "../../../helper/httpClient";
   import {
     getProduct,
@@ -35,6 +34,8 @@
   import * as RadioGroup from "$lib/components/ui/radio-group";
   import { STATUS, WEIGHT_UNIT } from "../../../helper/constants";
   import { getByValue, toastMessage } from "../../../helper/utils";
+  import VariantForm from "../../../components/Product/VariantForm.svelte";
+  import Variants from "../../../components/Product/Variants.svelte";
 
   let edit = false;
   let loading = true;
@@ -58,7 +59,8 @@
       value: 0,
       unit: WEIGHT_UNIT.KG,
     },
-    variantConfigs: [],
+    variants: [],
+    variantSchema: [],
     tags: [],
     collections: [],
     category: "",
@@ -71,16 +73,19 @@
   let collections = [];
   let categories = [];
 
-  const generateVariants = (variantOptions) => {
-    if (variantOptions.length === 0) {
-      return;
+  const generateVariants = (variantShema) => {
+    if (variantShema.length === 0) {
+      return [];
     }
 
-    const variantAttributes = variantOptions.map((option) =>
-      option.options.map((attr) => ({ [option.name]: attr.value }))
+    const variantAttributes = variantShema.map((variantSchemaItem) =>
+      variantSchemaItem.options.map((attr) => ({
+        [variantSchemaItem.name]: {
+          value: attr.value,
+          name: attr.displayName,
+        },
+      }))
     );
-
-    console.log(variantAttributes);
 
     function cartesianProduct(arr) {
       return arr.reduce(
@@ -93,69 +98,30 @@
 
     let variants_ = allVariantsAttributes.map((attributes) => {
       const sku = "";
-      // `${product.title}-${Object.entries(attributes)
-      //   .map(([key, value]) => `${key}-${value}`)
-      //   .join("-")}`;
-
-      //let old_variant = product_.variants.find(())
       let variant = {
         assets: [],
         sku,
         attributes,
-        compareAtPrice: 0,
-        price: 0, // Set the default price for the variant
+        compareAtPrice: product.compareAtPrice ?? 0,
+        price: product.price ?? 0, // Set the default price for the variant
         inventoryQuantity: 0, // Set the default inventory quantity for the variant
       };
-
-      // const newAttributes = variantOptions.map((variantOption) => {
-      //   return variantOption.name;
-      // });
-
-      // const oldAttributes = product_.variantOptions.map((variantOption) => {
-      //   return variantOption.name;
-      // });
-
-      // console.log(newAttributes)
-      // console.log(oldAttributes)
-
-      //   const oldVariantAttributes = product_.variantOptions.map((option) =>
-      //   option.options.map((attr) => ({ [option.name]: attr.value }))
-      // );
-
-      // console.log(variantAttributes)
-      // console.log(oldVariantAttributes)
-
-      // const oldSet = new Set(oldAttributes)
-      // const newSet = new Set(newAttributes)
-
-      // const commonSet  = new Set([...oldSet].filter(x => newSet.has(x)))
-
-      // const commonAttributes = [...commonSet]
-
       return variant;
     });
 
     return variants_;
   };
+  const handleGenerateVariants = () => {
+    const new_variants = generateVariants(product.variantSchema);
 
-  const createVariant = () => {
-    return {
-      sku: "",
-      attributes: {},
-      compareAtPrice: 0,
-      price: 0,
-      inventoryQuantity: 0,
-      assets: [],
-    };
-  };
-
-  const createVariants = (variantOptions) => {
-    variantOptions.forEach((variantOption) => {
-      variantOption.options.map((option) => {});
+    const filter_variants = new_variants.filter((variant) => {
+      return !product.variants.find((v) =>
+        lodash.isEqual(v.attributes, variant.attributes)
+      );
     });
-  };
 
-  const fillVariant = () => {};
+    product.variants = [...product.variants, ...filter_variants];
+  };
 
   const handleSave = async () => {
     loading = true;
@@ -225,21 +191,21 @@
     product.category = null;
   };
 
-  const handleCancelvariantConfigs = (e) => {
-    if (!product.variantConfigs[e.detail.index]._id) {
-      product.variantConfigs = [
-        ...product.variantConfigs.slice(0, e.detail.index),
-        ...product.variantConfigs.slice(e.detail.index + 1),
-      ];
-    }
-  };
+  // const handleCancelvariantConfigs = (e) => {
+  //   if (!product.variantConfigs[e.detail.index]._id) {
+  //     product.variantConfigs = [
+  //       ...product.variantConfigs.slice(0, e.detail.index),
+  //       ...product.variantConfigs.slice(e.detail.index + 1),
+  //     ];
+  //   }
+  // };
 
   const handleSlug = () => {
     product.slug = slug(product.title);
   };
 
   // const handleGenerateVariant = () => {
-  //   product.variants = generateVariants(product.variantOptions) ?? [];
+  //   product.variants = handleGenerateVariants(product.variantOptions) ?? [];
   // };
 
   const searchTag = async (search) => {
@@ -289,16 +255,16 @@
   //   };
   // };
 
-  const addVariantsData = () => {
-    product.variantConfigs = [
-      ...product.variantConfigs,
-      {
-        status: STATUS.DRAFT,
-        variantOptions: [],
-        variants: [],
-      },
-    ];
-  };
+  // const addVariantsData = () => {
+  //   product.variantConfigs = [
+  //     ...product.variantConfigs,
+  //     {
+  //       status: STATUS.DRAFT,
+  //       variantOptions: [],
+  //       variants: [],
+  //     },
+  //   ];
+  // };
 
   const initProduct = async (id) => {
     loading = true;
@@ -308,6 +274,25 @@
       product_ = structuredClone(product);
     }
     loading = false;
+  };
+
+  const handleDuplicate = async () => {
+    let duplicateProduct = structuredClone(product);
+    delete duplicateProduct._id;
+    duplicateProduct.title = `${duplicateProduct.title} copy`;
+    duplicateProduct.slug = slug(duplicateProduct.title);
+
+    const response = await httpClient(updateProduct, {
+      method: "POST",
+      payload: duplicateProduct,
+    });
+
+    if (response.status === 200) {
+      toastMessage("Product duplicated successfully");
+      goto(`/product/${response.data.product.id}`, {
+        replaceState: true,
+      });
+    }
   };
 
   $: {
@@ -333,8 +318,25 @@
 </script>
 
 <div class="py-4 px-8 max-w-7xl mx-auto">
-  <div class="mb-2 flex justify-between">
-    <h1 class="text-2xl font-semibold">Add Product</h1>
+  <div class="mb-2 flex gap-2">
+    <h1 class="text-2xl font-semibold grow">
+      {$page.params.id === "create" ? "Add Product" : "Edit Product"}
+    </h1>
+    {#if edit}
+      <Button type="Button" disabled={loading} on:click={handleSave}
+        >Save</Button
+      >
+    {:else}
+      <Button
+        type="Button"
+        on:click={() => {
+          edit = true;
+        }}>Edit</Button
+      >
+    {/if}
+    {#if $page.params.id !== "create"}
+      <Button on:click={handleDuplicate} disabled={edit}>Duplicate</Button>
+    {/if}
   </div>
 
   <div class="grid lg:grid-cols-3 gap-4 mb-3">
@@ -803,14 +805,26 @@
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="lg:col-span-2">
+    <Card.Root class="lg:col-span-3">
       <Card.Content class="p-4">
         <Spinner {loading}>
           <h3 class="text-normal font-semibold mb-4">Variants</h3>
-          <VariantConfigs
+          <VariantForm
+            bind:variantSchema={product.variantSchema}
             disabled={!edit}
-            bind:variantConfigs={product.variantConfigs}
           />
+          {#if true || (edit && product.variantSchema.length > 1)}
+            <Button variant="ghost" on:click={handleGenerateVariants}
+              >Generate Variants</Button
+            >
+          {/if}
+          {#if product.variants.length > 0}
+            <Variants
+              bind:variants={product.variants}
+              variantSchema={product.variantSchema}
+              disabled={!edit}
+            />
+          {/if}
         </Spinner>
       </Card.Content>
     </Card.Root>
