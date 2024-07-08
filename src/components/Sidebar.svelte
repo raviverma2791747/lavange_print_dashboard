@@ -53,7 +53,7 @@
       </li>
       <li class="px-4 py-2 cursor-pointer">
         <a class="flex justify-start items-center gap-2" href="/page">
-          <span>Pages</span></a
+          <span>Pages & Configurations</span></a
         >
       </li>
 

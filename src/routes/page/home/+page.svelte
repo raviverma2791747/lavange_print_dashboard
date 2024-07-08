@@ -80,7 +80,7 @@
   const fetchCategories = async (search) => {
     if (search) {
       const response = await httpClient(fetchCategory, {
-        params: { search },
+        queryParams: { search },
       });
 
       if (response.status === 200) {

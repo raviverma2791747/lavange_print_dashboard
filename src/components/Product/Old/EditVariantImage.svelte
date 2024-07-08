@@ -29,12 +29,13 @@
 
 {#if active_variant_index !== -1}
   <div class="flex gap-4 mb-4">
-    {#each Object.entries(variants[active_variant_index].attributes) as [key, attribute], index}
+    {#each Object.entries(variants[active_variant_index].attributes) as attribute, index}
       <div class="flex">
         <div class="font-semibold capitalize">
-          {getVariantSchema(key).displayName}
+          {getVariantSchema(attribute[0]).displayName}
         </div>
-        : {attribute.name}
+        : {getVariantOption(getVariantSchema(attribute[0]), attribute[1])
+          .displayName}
       </div>
     {/each}
   </div>

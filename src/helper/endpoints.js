@@ -51,4 +51,4 @@ export const getServerConfig = "/private/config/server";
 export const updateServerConfig = "/private/config/server";
 export const userLogout = "/public/user/logout";
 export const getHelpConfig = "/public/config/help";
-export const updateHelpConfig = "/public/config/help";
+export const updateHelpConfig = "/private/config/help";
