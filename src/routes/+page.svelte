@@ -100,17 +100,17 @@
               <Avatar.Root class="h-9 w-9">
                 <Avatar.Fallback
                   >{getName(
-                    order.user.firstName,
-                    order.user.lastName
+                    order?.user?.firstName,
+                    order?.user?.lastName
                   )}</Avatar.Fallback
                 >
               </Avatar.Root>
               <div class="ml-4 space-y-1">
                 <p class="text-sm font-medium leading-none">
-                  {order.user.username}
+                  {order.user ? order.user.username ?? "N/A" : "N/A"}
                 </p>
                 <p class="text-sm text-muted-foreground">
-                  {order.user.email}
+                  {order.user ?  order.user.email ?? "N/A" : "N/A"}
                 </p>
               </div>
               <div class="ml-auto font-medium">

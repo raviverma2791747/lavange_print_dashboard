@@ -22,7 +22,7 @@
     if (id !== "create") {
       const response = await httpClient(`${getImage}/${id}`);
 
-      if (response.status === 200) {
+      if (response && response.status === 200) {
         previewImage = response.data.image;
         dispatch("loaded", { previewImage });
       } else {
@@ -41,7 +41,11 @@
   {#if loading}
     <Spinner />
   {:else if error}
-    Error
+    <div
+      class="flex items-center justify-center border rounded-lg w-full h-full p-2"
+    >
+      Error
+    </div>
   {:else}
     {#if previewImage}
       <img src={previewImage.url} alt={previewImage.title} />
@@ -53,19 +57,18 @@
       </div>
     {/if}
 
-    <div class="absolute top-0 z-20 right-0 m-2">
-      <button
-        variant="ghost"
-        {disabled}
-        class="text-red-500"
-        on:click={() => dispatch("delete", { id })}
-      >
-        <Trash2 class="w-5 h-5" />
-      </button>
-    </div>
-
     <div class="font-semibold">
       {previewImage?.title}
     </div>
   {/if}
+  <div class="absolute top-0 z-20 right-0 m-2">
+    <button
+      variant="ghost"
+      {disabled}
+      class="text-red-500"
+      on:click={() => dispatch("delete", { id })}
+    >
+      <Trash2 class="w-5 h-5" />
+    </button>
+  </div>
 </div>
